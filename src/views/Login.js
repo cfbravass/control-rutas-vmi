@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react'
 
 import { useAuth } from '../contexts/AuthContext'
 
+import logoAzul from '../static/assets/img/logo-vanessa-azul.png'
+
 function Login() {
   document.title = 'Ingresar - Rutas VMI Vanessa'
   const navigate = useNavigate()
@@ -12,9 +14,14 @@ function Login() {
 
   const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleRedirectOrBack = () => {
     navigate(location.state?.from ?? '/', { replace: true })
+  }
+
+  const handleShowPass = () => {
+    setShowPassword(!showPassword)
   }
 
   const handleLogin = async (e) => {
@@ -70,7 +77,6 @@ function Login() {
   }
 
   useEffect(() => {
-    console.log(isAuthenticated())
     if (isAuthenticated()) {
       handleRedirectOrBack()
     }
@@ -78,49 +84,81 @@ function Login() {
   }, [])
 
   return (
-    <div className='container text-center'>
-      <h2>Acceso a Rutas VMI Vanessa</h2>
-      <form>
-        <div className='form-floating mb-3'>
-          <input
-            type='email'
-            className='form-control'
-            id='email'
-            placeholder='correo'
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <label htmlFor='email'>
-            <sup className='text-danger'>*</sup>Correo:
-          </label>
-        </div>
-        <div className='form-floating'>
-          <input
-            type='password'
-            className='form-control'
-            id='password'
-            placeholder='contraseña'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <label htmlFor='password'>
-            <sup className='text-danger'>*</sup>Contraseña:
-          </label>
-        </div>
+    <div className='d-flex align-items-center justify-content-center vh-100'>
+      <div className='mx-4 p-5 rounded border bg-light text-center'>
+        <img src={logoAzul} alt='Logo Vanessa' height='69' className='mb-3' />
+        <h1>Control Rutas VMI</h1>
+        <h4 className='mb-4'>Acceder a tu cuenta</h4>
+        <form>
+          <div className='input-group mb-3'>
+            <span className='input-group-text'>
+              <i className='fas fa-envelope'></i>
+            </span>
+            <div className='form-floating'>
+              <input
+                autoComplete='email'
+                className='form-control'
+                id='email'
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder='correo'
+                required
+                type='email'
+                value={email}
+              />
+              <label htmlFor='email'>Correo</label>
+            </div>
+          </div>
 
-        <button
-          type='button'
-          onClick={handleLogin}
-          className='btn btn-outline-info me-2 my-2'
-        >
-          Iniciar Sesión
-        </button>
-        <p>
-          ¿No tiene una cuenta? <Link to='/registro'>Cree una</Link>.
-        </p>
-      </form>
+          <div className='input-group mb-3'>
+            <span className='input-group-text'>
+              <i className='fas fa-key'></i>
+            </span>
+            <div className='form-floating'>
+              <input
+                autoComplete='current-password'
+                className='form-control'
+                id='password'
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder='contraseña'
+                required
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+              />
+              <label htmlFor='password'>Contraseña</label>
+            </div>
+            <span
+              role='button'
+              className='input-group-text text-center'
+              title={showPassword ? 'Ocultar' : 'Mostrar'}
+              onClick={handleShowPass}
+            >
+              {/* span adicional con estilos para alinear ambos iconos */}
+              <span
+                style={{
+                  width: '1em',
+                }}
+              >
+                <i
+                  className={showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'}
+                  style={{ marginRight: '-4px' }}
+                ></i>
+              </span>
+            </span>
+          </div>
+
+          <button
+            type='button'
+            onClick={handleLogin}
+            className='btn btn-outline-dark me-2 my-2'
+          >
+            <i className='fas fa-arrow-right-to-bracket'>&nbsp;</i>
+            Iniciar Sesión
+          </button>
+          <p>
+            ¿No tiene una cuenta? <Link to='/registro'>Crear una</Link>.
+          </p>
+        </form>
+      </div>
     </div>
   )
 }

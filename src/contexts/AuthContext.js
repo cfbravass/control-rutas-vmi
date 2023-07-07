@@ -36,7 +36,6 @@ export default function AuthContextProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log(user)
       toast.loading('Validando permisos...', {
         position: toast.POSITION.BOTTOM_CENTER,
         autoClose: true,

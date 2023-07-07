@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { toast } from 'react-toastify'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
+import { useState } from 'react'
+
 import { useAuth } from '../contexts/AuthContext'
 
-import { toast } from 'react-toastify'
+import logoAzul from '../static/assets/img/logo-vanessa-azul.png'
 
 function Register() {
   document.title = 'Ingresar - Rutas VMI Vanessa'
@@ -10,12 +12,23 @@ function Register() {
   const location = useLocation()
   const { register } = useAuth()
 
-  const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
   const [nombre, setNombre] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+
+  const handleShowPass = () => {
+    setShowPassword(!showPassword)
+  }
 
   const handleRedirectOrBack = () => {
     navigate(location.state?.from ?? '/', { replace: true })
+  }
+
+  const updateNombre = (e) => {
+    const { value } = e.target
+    const uppercaseValue = value.toUpperCase()
+    setNombre(uppercaseValue)
   }
 
   const handleRegister = async (e) => {
@@ -51,63 +64,102 @@ function Register() {
   }
 
   return (
-    <div className='container text-center'>
-      <h2>Registro de Usuarios Nuevos</h2>
-      <form>
-        <div className='form-floating mb-3'>
-          <input
-            type='text'
-            className='form-control'
-            id='nombre'
-            placeholder='nombre'
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            required
-          />
-          <label htmlFor='nombre'>
-            <sup className='text-danger'>*</sup>Nombre Completo:
-          </label>
-        </div>
-        <div className='form-floating mb-3'>
-          <input
-            type='email'
-            className='form-control'
-            id='email'
-            placeholder='correo'
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <label htmlFor='email'>
-            <sup className='text-danger'>*</sup>Correo:
-          </label>
-        </div>
-        <div className='form-floating'>
-          <input
-            type='password'
-            className='form-control'
-            id='password'
-            placeholder='contraseña'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <label htmlFor='password'>
-            <sup className='text-danger'>*</sup>Contraseña:
-          </label>
-        </div>
+    <div className='d-flex align-items-center justify-content-center vh-100'>
+      <div className='mx-4 p-5 rounded border bg-light text-center'>
+        <img src={logoAzul} alt='Logo Vanessa' height='69' className='mb-3' />
+        <h1>Control Rutas VMI</h1>
+        <h4 className='mb-4'>Crear una nueva cuenta</h4>
+        <form>
+          <div className='input-group mb-3'>
+            <span className='input-group-text'>
+              <i className='fas fa-user'></i>
+            </span>
+            <div className='form-floating'>
+              <input
+                type='text'
+                className='form-control'
+                id='nombre'
+                placeholder='nombre'
+                value={nombre}
+                onChange={updateNombre}
+                required
+              />
+              <label htmlFor='nombre'>
+                <sup className='text-danger'>*</sup>Nombre Completo
+              </label>
+            </div>
+          </div>
+          <div className='input-group mb-3'>
+            <span className='input-group-text'>
+              <i className='fas fa-envelope'></i>
+            </span>
+            <div className='form-floating'>
+              <input
+                autoComplete='email'
+                className='form-control'
+                id='email'
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder='correo'
+                required
+                type='email'
+                value={email}
+              />
+              <label htmlFor='email'>
+                <sup className='text-danger'>*</sup>Correo
+              </label>
+            </div>
+          </div>
+          <div className='input-group mb-3'>
+            <span className='input-group-text'>
+              <i className='fas fa-key'></i>
+            </span>
+            <div className='form-floating'>
+              <input
+                autoComplete='current-password'
+                className='form-control'
+                id='password'
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder='contraseña'
+                required
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+              />
+              <label htmlFor='password'>
+                <sup className='text-danger'>*</sup>Contraseña
+              </label>
+            </div>
+            <span
+              role='button'
+              className='input-group-text text-center'
+              title={showPassword ? 'Ocultar' : 'Mostrar'}
+              onClick={handleShowPass}
+            >
+              {/* span adicional con estilos para alinear ambos iconos */}
+              <span
+                style={{
+                  width: '1em',
+                }}
+              >
+                <i
+                  className={showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'}
+                  style={{ marginRight: '-4px' }}
+                ></i>
+              </span>
+            </span>
+          </div>
 
-        <button
-          type='button'
-          onClick={handleRegister}
-          className='btn btn-outline-info my-2'
-        >
-          Crear Cuenta
-        </button>
-        <p>
-          ¿Ya tiene una cuenta? <Link to='/ingreso'>Ingresar</Link>.
-        </p>
-      </form>
+          <button
+            type='button'
+            onClick={handleRegister}
+            className='btn btn-outline-info my-2'
+          >
+            Crear Cuenta
+          </button>
+          <p>
+            ¿Ya tiene una cuenta? <Link to='/ingreso'>Ingresar</Link>.
+          </p>
+        </form>
+      </div>
     </div>
   )
 }
