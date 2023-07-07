@@ -11,13 +11,13 @@ import NotifyContextProvider from './contexts/NotifyContext'
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
-      <NotifyContextProvider>
-        <AuthContextProvider>
+      <AuthContextProvider>
+        <NotifyContextProvider>
           <Routes>
             <Route path='/*' element={<App />} />
           </Routes>
-        </AuthContextProvider>
-      </NotifyContextProvider>
+        </NotifyContextProvider>
+      </AuthContextProvider>
     </BrowserRouter>
   </React.StrictMode>,
   document.getElementById('root')

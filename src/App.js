@@ -8,13 +8,14 @@ import RequireAuth from './components/RequireAuth'
 /* VISTAS */
 import Home from './views/Home'
 import Login from './views/Login'
+import ProgramarRuta from './views/ProgramarRuta'
+import Rutas from './views/Rutas'
 import NotFound404 from './views/NotFound404'
 import Register from './views/Register'
 import Unauthorized from './views/Unauthorized'
 
 const ROLES = {
   Usuario: 'usuario', // Asignado por defecto a todas las cuentas creadas
-  Vendedor: 'vendedor',
   Admin: 'admin',
 }
 
@@ -26,7 +27,6 @@ function App() {
   useEffect(() => {
     // Manejo de redireccion segun autenticacion y roles de usuario
     if (location.pathname === '/ingreso' && isAuthenticated()) {
-      console.error(location.state?.from)
       navigate(location.state?.from ?? '/', { replace: true })
     }
     // eslint-disable-next-line
@@ -34,22 +34,25 @@ function App() {
 
   return (
     <Routes>
-      <Route exact path='/ingreso' element={<Login />} />
+      <Route path='/ingreso' element={<Login />} />
       <Route path='/registro' element={<Register />} />
 
       <Route path='/' element={<MainLayout />}>
-        {/* Rutas Públicas */}
-        {/* (Error 403) No Autorizado */}
-        <Route path='unauthorized' element={<Unauthorized />} />
-
         {/* Rutas Privadas */}
         <Route element={<RequireAuth allowedRoles={[ROLES.Usuario]} />}>
           <Route path='/' element={<Home />} />
+          <Route path='/rutas' element={<Rutas />} />
         </Route>
-
-        {/* (Error 404) Recurso No Encontrado */}
-        <Route path='*' element={<NotFound404 />} />
+        <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
+          <Route path='/programacion' element={<ProgramarRuta />} />
+        </Route>
       </Route>
+
+      {/* (Error 403) No Autorizado */}
+      <Route path='/unauthorized' element={<Unauthorized />} />
+
+      {/* (Error 404) Recurso No Encontrado */}
+      <Route path='*' element={<NotFound404 />} />
     </Routes>
   )
 }
