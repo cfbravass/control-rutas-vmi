@@ -3,6 +3,7 @@ import { NavLink, Link, Outlet } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 import logo from '../static/assets/img/vanessa.ico'
+import { ROLES } from '../routes'
 
 const MainLayout = () => {
   const { logout, userRoles } = useAuth()
@@ -41,13 +42,13 @@ const MainLayout = () => {
                   Inicio
                 </NavLink>
               </li>
-              {userRoles.includes('admin') && (
+              {userRoles.includes(ROLES.Admin) && (
                 <li className='nav-item'>
                   <NavLink
                     className='nav-link btn btn-light fw-semibold mx-1'
-                    to='/programacion'
+                    to='/maestro'
                   >
-                    Programación
+                    Maestro
                   </NavLink>
                 </li>
               )}

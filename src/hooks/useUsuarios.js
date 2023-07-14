@@ -6,14 +6,15 @@ import { db } from '../firebaseApp'
 
 function useUsuarios() {
   const [usuarios, setUsuarios] = useState([])
+  const [cargandoUsuarios, setCargandoUsuarios] = useState(true)
 
   useEffect(() => {
     const obtenerUsuarios = async () => {
+      setCargandoUsuarios(true)
       try {
         const usuariosCollection = collection(db, 'usuarios')
         const usuariosSnapshot = await getDocs(usuariosCollection)
         const usuariosData = usuariosSnapshot.docs.map((doc) => ({
-          id: doc.id,
           ...doc.data(),
         }))
         setUsuarios(usuariosData)
@@ -23,12 +24,13 @@ function useUsuarios() {
         })
         console.error(error)
       }
+      setCargandoUsuarios(false)
     }
 
     obtenerUsuarios()
   }, [])
 
-  return usuarios
+  return { usuarios, cargandoUsuarios }
 }
 
 export default useUsuarios
