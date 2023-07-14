@@ -17,7 +17,7 @@ export default function NotifyContextProvider({ children }) {
 
   return (
     <NotifyContext.Provider value={null}>
-      <ToastContainer position='bottom-right' />
+      <ToastContainer position='bottom-center' />
       {children}
     </NotifyContext.Provider>
   )
