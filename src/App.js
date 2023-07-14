@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 
+import { ROLES } from './routes'
 import { useAuth } from './contexts/AuthContext'
 import MainLayout from './layouts/MainLayout'
 import RequireAuth from './components/RequireAuth'
@@ -8,16 +9,11 @@ import RequireAuth from './components/RequireAuth'
 /* VISTAS */
 import Home from './views/Home'
 import Login from './views/Login'
-import ProgramarRuta from './views/ProgramarRuta'
+import Maestro from './views/Maestro'
 import Rutas from './views/Rutas'
 import NotFound404 from './views/NotFound404'
 import Register from './views/Register'
 import Unauthorized from './views/Unauthorized'
-
-const ROLES = {
-  Usuario: 'usuario', // Asignado por defecto a todas las cuentas creadas
-  Admin: 'admin',
-}
 
 function App() {
   const location = useLocation()
@@ -44,7 +40,7 @@ function App() {
           <Route path='/rutas' element={<Rutas />} />
         </Route>
         <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
-          <Route path='/programacion' element={<ProgramarRuta />} />
+          <Route path='/maestro' element={<Maestro />} />
         </Route>
       </Route>
 

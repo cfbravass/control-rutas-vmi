@@ -49,7 +49,7 @@ function Mapa({ infoMapa }) {
   }, [infoMapa])
 
   return (
-    <div ref={mapContainerRef} style={{ height: '400px', width: '100%' }} />
+    <div ref={mapContainerRef} style={{ height: '369px', width: '100%' }} />
   )
 }
 

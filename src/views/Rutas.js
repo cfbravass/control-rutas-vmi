@@ -1,30 +1,23 @@
-import { toast } from 'react-toastify'
 import React, { useEffect, useState } from 'react'
 
+import { ROLES } from '../routes'
 import { useAuth } from '../contexts/AuthContext'
+
+/* Componentes */
 import Cargando from '../components/Cargando'
-import Mapa from '../components/Mapa'
+import ModalMapa from '../components/rutas/ModalMapa'
+import ModalFichaje from '../components/rutas/ModalFichaje'
+
+/* Hooks */
 import useRutas from '../hooks/useRutas'
+import useUsuarios from '../hooks/useUsuarios'
 
 function Rutas() {
   const { currentUser, userRoles } = useAuth()
-  const { rutas, marcarLlegada, cargandoRutas } = useRutas()
-  const [rutasUsuario, setRutasUsuario] = useState([])
-  const [infoMapa, setInfoMapa] = useState({
-    latitude: 0,
-    longitude: 0,
-    nombre: '',
-    fecha: '',
-  })
-
-  const abrirMapa = (latitude, longitude, nombre, fecha) => {
-    setInfoMapa({
-      latitude,
-      longitude,
-      nombre,
-      fecha,
-    })
-  }
+  const { rutas, cargandoRutas } = useRutas()
+  const { usuarios, cargandoUsuarios } = useUsuarios()
+  const [rutasFiltradas, setRutasFiltradas] = useState([])
+  const [buscar, setBuscar] = useState('')
 
   const ordenarFechas = (fechas) => {
     return fechas.sort((a, b) => {
@@ -34,194 +27,180 @@ function Rutas() {
     })
   }
 
-  const handleMarcarLlegada = async (rutaId, fecha, almacen) => {
-    const ruta = rutas.find((ruta) => ruta.id === rutaId)
-
-    toast.promise(
-      marcarLlegada(ruta, fecha, almacen),
-      {
-        pending: 'Reportando llegada...',
-        error: 'Error al marcar la llegada.',
-        success: 'Reporte marcado con éxito.',
-      },
-      { position: 'bottom-center' }
+  const handleBusqueda = (e) => {
+    const { value } = e.target
+    const uppercaseValue = value.toUpperCase()
+    setBuscar(uppercaseValue)
+    const rutasFiltradas = filtrarRutas(
+      uppercaseValue,
+      userRoles.includes(ROLES.Admin),
+      currentUser.uid
     )
+    setRutasFiltradas(rutasFiltradas)
+  }
+
+  const filtrarRutas = (busqueda, esAdmin, uidUsuario) => {
+    if (esAdmin) {
+      return rutas.filter((ruta) => ruta.nombreUsuario.includes(busqueda))
+    } else {
+      return rutas.filter(
+        (ruta) =>
+          ruta.uidUsuario === uidUsuario &&
+          ruta.nombreUsuario.includes(busqueda)
+      )
+    }
   }
 
   useEffect(() => {
-    if (userRoles.includes('admin')) {
-      setRutasUsuario(rutas)
-    } else {
-      const filteredRutas = rutas.filter(
-        (ruta) => ruta.uidUsuario === currentUser.uid
-      )
-      setRutasUsuario(filteredRutas)
-    }
+    const rutasFiltradas = filtrarRutas(
+      '',
+      userRoles.includes(ROLES.Admin),
+      currentUser.uid
+    )
+    setRutasFiltradas(rutasFiltradas)
+    // eslint-disable-next-line
   }, [rutas, userRoles, currentUser.uid])
-
-  if (cargandoRutas) {
-    return <Cargando />
-  }
 
   return (
     <>
-      <div className='container'>
-        <h1 className='text-center'>Mis Rutas Programadas</h1>
+      <div className='mx-5'>
+        <h1 className='text-center'>Rutas Programadas</h1>
+        <br />
 
-        {rutasUsuario.map((ruta) => (
-          <div className='row mx-2' key={ruta.id}>
-            <div className='text-center p-2'>ID Ruta: {ruta.id}</div>
-            {ordenarFechas(Object.keys(ruta.locaciones)).map((fecha) => {
-              const [dia, mes, anio] = fecha.split('-')
-              const date = new Date(anio, mes - 1, dia)
-              let formattedFecha = date.toLocaleDateString('es-ES', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'numeric',
-                year: 'numeric',
-              })
+        {userRoles.includes(ROLES.Admin) && (
+          <div className='input-group mb-3'>
+            <label htmlFor='listaUsuarios' className='input-group-text'>
+              <i className='fas fa-id-card-clip me-1'></i> Promotora:
+            </label>
+            <input
+              className='form-control rounded-end'
+              list='datalistOptions'
+              id='listaUsuarios'
+              placeholder='Buscar...'
+              onChange={(e) => handleBusqueda(e)}
+              value={buscar}
+            />
+            <datalist id='datalistOptions'>
+              {usuarios.map((usuario) => (
+                <option key={usuario.uid} value={usuario.nombre} />
+              ))}
+            </datalist>
+          </div>
+        )}
 
-              formattedFecha =
-                formattedFecha.charAt(0).toUpperCase() + formattedFecha.slice(1)
+        {cargandoRutas || cargandoUsuarios ? (
+          <Cargando />
+        ) : (
+          <div className='accordion' id='accordionRutasProgramadas'>
+            {rutasFiltradas.length !== 0 ? (
+              rutasFiltradas.map((ruta) => (
+                <div className='accordion-item' key={ruta.id}>
+                  <h2 className='accordion-header'>
+                    <button
+                      className={`accordion-button ${
+                        ruta.id !== rutasFiltradas[0].id ? 'collapsed' : ''
+                      }`}
+                      type='button'
+                      data-bs-toggle='collapse'
+                      data-bs-target={`#${ruta.id}`}
+                      aria-controls={ruta.id}
+                    >
+                      {ruta.nombreUsuario}
+                    </button>
+                  </h2>
+                  <div
+                    id={ruta.id}
+                    className={`accordion-collapse collapse ${
+                      ruta.id !== rutasFiltradas[0].id ? '' : 'show'
+                    }`}
+                    data-bs-parent='#accordionRutasProgramadas'
+                  >
+                    <div className='row accordion-body d-flex justify-content-center'>
+                      {ordenarFechas(Object.keys(ruta.locaciones)).map(
+                        (fecha) => {
+                          const [dia, mes, anio] = fecha.split('-')
+                          const date = new Date(anio, mes - 1, dia)
+                          let formattedFecha = date.toLocaleDateString(
+                            'es-ES',
+                            {
+                              weekday: 'long',
+                              day: 'numeric',
+                              month: 'numeric',
+                              year: 'numeric',
+                            }
+                          )
 
-              return (
-                <div
-                  className='col-12 col-lg-2 text-center mb-3 border rounded bg-light py-2'
-                  key={fecha}
-                >
-                  <div className='row mb-4'>
-                    <div className='col'>
-                      <div>{formattedFecha}</div>
-                      {ruta.locaciones[fecha].almacenesProgramados && (
-                        <>
-                          <p className='m-0 text-primary'>
-                            Almacenes Programados
-                          </p>
-                          <div>
-                            {ruta.locaciones[fecha].almacenesProgramados.map(
-                              (nombreAlmacen) => (
-                                <div key={`${nombreAlmacen}+${fecha}`}>
-                                  {nombreAlmacen}
-                                  <button
-                                    onClick={() =>
-                                      handleMarcarLlegada(
-                                        ruta.id,
-                                        fecha,
-                                        nombreAlmacen
-                                      )
-                                    }
-                                  >
-                                    Marcar llegada
-                                  </button>
-                                </div>
-                              )
-                            )}
-                          </div>
-                        </>
-                      )}
-                      {ruta.locaciones[fecha].almacenesVisitados !== {} && (
-                        <>
-                          <p className='m-0 text-info'>Almacenes Visitados</p>
-                          <div>
-                            {Object.entries(
-                              ruta.locaciones[fecha].almacenesVisitados
-                            ).map(([nombreAlmacen, almacenData]) => (
-                              <div key={nombreAlmacen}>
-                                {nombreAlmacen}
-                                <br />
-                                Hora de visita:{' '}
-                                {almacenData.horaVisita && (
-                                  <>
-                                    {typeof almacenData.horaVisita.toDate ===
-                                    'function'
-                                      ? almacenData.horaVisita
-                                          .toDate()
-                                          .toLocaleString('es-ES')
-                                      : almacenData.horaVisita.toLocaleString(
-                                          'es-ES'
-                                        )}
-                                  </>
-                                )}
-                                <br />
-                                Ubicación:{' '}
-                                {almacenData.ubicacion && (
-                                  <>
-                                    {almacenData.ubicacion.latitude},{' '}
-                                    {almacenData.ubicacion.longitude}
-                                    <button
-                                      type='button'
-                                      data-bs-toggle='modal'
-                                      data-bs-target='#modalMapa'
-                                      onClick={() =>
-                                        abrirMapa(
-                                          almacenData.ubicacion.latitude,
-                                          almacenData.ubicacion.longitude,
-                                          nombreAlmacen,
-                                          typeof almacenData.horaVisita
-                                            .toDate === 'function'
-                                            ? almacenData.horaVisita
-                                                .toDate()
-                                                .toLocaleString('es-ES')
-                                            : almacenData.horaVisita.toLocaleString(
-                                                'es-ES'
-                                              )
-                                        )
-                                      }
+                          formattedFecha =
+                            formattedFecha.charAt(0).toUpperCase() +
+                            formattedFecha.slice(1)
+
+                          return (
+                            <div
+                              className='col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 text-center mb-3 border rounded bg-light py-2'
+                              key={fecha}
+                            >
+                              <div className='mb-4'>
+                                <div>
+                                  <div>
+                                    <i className='far fa-calendar fa-2x text-primary'></i>
+                                    <br />
+                                    {formattedFecha}
+                                  </div>
+                                  <ul className='list-group fs-6 mb-1'>
+                                    <li
+                                      className='list-group-item active'
+                                      aria-current='true'
                                     >
-                                      Ver
-                                    </button>
-                                  </>
-                                )}
+                                      PROGRAMACIÓN
+                                    </li>
+                                    {Object.entries(ruta.locaciones[fecha]).map(
+                                      ([nombreAlmacen, datosVisita]) => (
+                                        <li
+                                          className='list-group-item'
+                                          key={`${
+                                            ruta.id
+                                          }${nombreAlmacen.replace(
+                                            ' ',
+                                            ''
+                                          )}${fecha}`}
+                                        >
+                                          <small>{nombreAlmacen}</small>
+                                        </li>
+                                      )
+                                    )}
+                                  </ul>
+                                  {userRoles.includes(ROLES.Admin) ? (
+                                    <ModalMapa
+                                      modalId={`${ruta.id}${fecha}`}
+                                      ruta={ruta}
+                                      fecha={fecha}
+                                      almacenes={ruta.locaciones[fecha]}
+                                    />
+                                  ) : (
+                                    <ModalFichaje
+                                      modalId={`${ruta.id}${fecha}`}
+                                      ruta={ruta}
+                                      fecha={fecha}
+                                      almacenes={ruta.locaciones[fecha]}
+                                    />
+                                  )}
+                                </div>
                               </div>
-                            ))}
-                          </div>
-                        </>
+                            </div>
+                          )
+                        }
                       )}
                     </div>
                   </div>
                 </div>
-              )
-            })}
+              ))
+            ) : (
+              <p className='text-center text-danger fa-bounce'>
+                No se han encontrado resultados
+              </p>
+            )}
           </div>
-        ))}
-      </div>
-
-      <Mapa infoMapa={infoMapa} />
-
-      <div
-        className='modal fade'
-        id='modalMapa'
-        tabIndex='-1'
-        aria-labelledby='modalMapaLabel'
-        aria-hidden='true'
-      >
-        <div className='modal-dialog'>
-          <div className='modal-content'>
-            <div className='modal-header'>
-              <h1 className='modal-title fs-5' id='modalMapaLabel'>
-                Mapa
-              </h1>
-              <button
-                type='button'
-                className='btn-close'
-                data-bs-dismiss='modal'
-                aria-label='Close'
-              ></button>
-            </div>
-            <div className='modal-body d-flex align-items-center justify-content-center'>
-              <Mapa infoMapa={infoMapa} />
-            </div>
-            <div className='modal-footer'>
-              <button
-                type='button'
-                className='btn btn-secondary'
-                data-bs-dismiss='modal'
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </>
   )

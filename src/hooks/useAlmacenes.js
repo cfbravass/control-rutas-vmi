@@ -28,7 +28,7 @@ function useAlmacenes() {
     obtenerAlmacenes()
   }, [])
 
-  return almacenes
+  return { almacenes }
 }
 
 export default useAlmacenes
