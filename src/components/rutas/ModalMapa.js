@@ -1,9 +1,18 @@
 import { format } from 'date-fns'
 import { useState } from 'react'
+
 import Mapa from '../Mapa'
+import useAlmacenes from '../../hooks/useAlmacenes'
 
 const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
   const [mostrarMapa, setMostrarMapa] = useState(false)
+  const { datos: datosAlmacenes } = useAlmacenes()
+  const [infoMapa, setInfoMapa] = useState({
+    latitude: 0,
+    longitude: 0,
+    nombre: '',
+    fecha: '',
+  })
 
   const almacenesOrdenados = Object.entries(almacenes).sort((a, b) =>
     a[0].localeCompare(b[0])
@@ -13,13 +22,6 @@ const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
     const date = timestamp.toDate() // Convierte el objeto Timestamp a un objeto Date
     return format(date, formato) // Formatea la hora en 'DD/MM/AAAA HH:MM:SS AM/PM'
   }
-
-  const [infoMapa, setInfoMapa] = useState({
-    latitude: 0,
-    longitude: 0,
-    nombre: '',
-    fecha: '',
-  })
 
   const abrirMapa = ({ latitude, longitude, nombre, fecha }) => {
     setInfoMapa({
@@ -55,21 +57,21 @@ const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
         data-bs-backdrop='static'
         data-bs-keyboard='false'
       >
-        <div class='modal-dialog'>
-          <div class='modal-content'>
-            <div class='modal-header'>
-              <h1 class='modal-title fs-5' id='modalMapaLabel'>
+        <div className='modal-dialog'>
+          <div className='modal-content'>
+            <div className='modal-header'>
+              <h1 className='modal-title fs-5' id='modalMapaLabel'>
                 [{fecha}] Detalles de Ruta
               </h1>
               <button
                 type='button'
-                class='btn-close'
+                className='btn-close'
                 data-bs-dismiss='modal'
                 aria-label='Close'
                 onClick={() => cerrarMapa()}
               ></button>
             </div>
-            <div class='modal-body'>
+            <div className='modal-body'>
               <h6>{ruta.nombreUsuario}</h6>
 
               <table className='table table-sm table-hover table-bordered'>
@@ -89,8 +91,24 @@ const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
                 <tbody>
                   {almacenesOrdenados.map(([nombreAlmacen, datosVisita]) => (
                     <tr key={nombreAlmacen}>
-                      <th scope='row'>{nombreAlmacen}</th>
-                      {datosVisita.fechaIngreso ? (
+                      <th
+                        role='button'
+                        onClick={() => {
+                          const ubicacion = datosAlmacenes.find(
+                            (a) => a.nombre === nombreAlmacen
+                          )?.ubicacion
+                          abrirMapa({
+                            latitude: ubicacion.latitude,
+                            longitude: ubicacion.longitude,
+                            nombre: nombreAlmacen,
+                            fecha: '',
+                          })
+                        }}
+                        scope='row'
+                      >
+                        {nombreAlmacen}
+                      </th>
+                      {datosVisita.ubicacionIngreso ? (
                         <th
                           role='button'
                           onClick={() =>
@@ -106,9 +124,9 @@ const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
                           {formatoFecha(datosVisita.fechaIngreso, 'h:mm a')}
                         </th>
                       ) : (
-                        <th></th>
+                        <th>-o-</th>
                       )}
-                      {datosVisita.fechaSalida ? (
+                      {datosVisita.ubicacionSalida ? (
                         <th
                           role='button'
                           onClick={() =>
@@ -124,7 +142,7 @@ const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
                           {formatoFecha(datosVisita.fechaSalida, 'h:mm a')}
                         </th>
                       ) : (
-                        <th></th>
+                        <th>-o-</th>
                       )}
                     </tr>
                   ))}
@@ -132,10 +150,10 @@ const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
               </table>
               {mostrarMapa && <Mapa infoMapa={infoMapa} />}
             </div>
-            <div class='modal-footer'>
+            <div className='modal-footer'>
               <button
                 type='button'
-                class='btn btn-secondary'
+                className='btn btn-secondary'
                 data-bs-dismiss='modal'
                 onClick={() => cerrarMapa()}
               >
