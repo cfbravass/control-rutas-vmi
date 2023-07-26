@@ -147,7 +147,7 @@ function Login() {
           </div>
 
           <button
-            type='button'
+            type='submit'
             onClick={handleLogin}
             className='btn btn-outline-dark me-2 my-2'
           >

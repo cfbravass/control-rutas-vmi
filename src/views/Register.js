@@ -149,7 +149,7 @@ function Register() {
           </div>
 
           <button
-            type='button'
+            type='submit'
             onClick={handleRegister}
             className='btn btn-outline-info my-2'
           >
