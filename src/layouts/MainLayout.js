@@ -43,13 +43,32 @@ const MainLayout = () => {
                 </NavLink>
               </li>
               {userRoles.includes(ROLES.Admin) && (
-                <li className='nav-item'>
-                  <NavLink
-                    className='nav-link btn btn-light fw-semibold mx-1'
-                    to='/maestro'
+                <li className='nav-item dropdown'>
+                  <button
+                    className='nav-link nav-item dropdown-toggle btn btn-light fw-semibold mx-auto'
+                    data-bs-toggle='dropdown'
+                    aria-expanded='false'
                   >
-                    Maestro
-                  </NavLink>
+                    Maestros
+                  </button>
+                  <ul className='dropdown-menu'>
+                    <li>
+                      <NavLink
+                        className='dropdown-item btn btn-light'
+                        to='/maestros/rutas'
+                      >
+                        Rutas
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink
+                        className='dropdown-item btn btn-light'
+                        to='/maestros/almacenes'
+                      >
+                        Almacenes
+                      </NavLink>
+                    </li>
+                  </ul>
                 </li>
               )}
               <li className='nav-item'>

@@ -1,63 +1,57 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 
-import {
-  collection,
-  getDocs,
-  doc,
-  addDoc,
-  updateDoc,
-  setDoc,
-  serverTimestamp,
-  onSnapshot,
-  GeoPoint,
-} from 'firebase/firestore'
+import { doc, updateDoc, serverTimestamp, GeoPoint } from 'firebase/firestore'
 import { db } from '../firebaseApp'
 import { toast } from 'react-toastify'
-
-import useAlmacenes from './useAlmacenes'
+import useFirestore from './useFirestore'
 
 function useRutas() {
-  const [rutas, setRutas] = useState([])
-  const [cargandoRutas, setCargandoRutas] = useState(true)
+  const {
+    datos: rutas,
+    cargando: cargandoRutas,
+    editarDocumento,
+    agregarDocumento,
+  } = useFirestore('rutas')
 
   useEffect(() => {
-    obtenerRutas()
-    // Suscribirse a los cambios en la colección de rutas
-    const unsubscribe = onSnapshot(collection(db, 'rutas'), (snapshot) => {
-      const rutasData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
-      setRutas(rutasData)
-    })
+    desactivarRutasVencidas()
+    // eslint-disable-next-line
+  }, [rutas])
 
-    // Devolver una función de limpieza para cancelar la suscripción cuando el componente se desmonte
-    return () => unsubscribe()
-  }, [])
-
-  const obtenerRutas = async () => {
-    setCargandoRutas(true)
+  const desactivarRutasVencidas = async () => {
     try {
-      const rutasCollection = collection(db, 'rutas')
-      const rutasSnapshot = await getDocs(rutasCollection)
-      const rutasData = rutasSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
-      const rutasActivas = rutasData.filter((ruta) => ruta.activo === true)
-      setRutas(rutasActivas)
+      // Verificar si la fecha actual es mayor a todas las fechas programadas para desactivar la ruta
+      const fechaActual = new Date()
+      fechaActual.setHours(0, 0, 0, 0)
+
+      for (const ruta of rutas) {
+        if (ruta.activo) {
+          const locaciones = ruta.locaciones
+          // Se obtienen las fechas programadas en la ruta y se ordenan de mas antigua a mas reciente
+          const fechasProgramadas = Object.keys(locaciones).sort((a, b) => {
+            const dateA = new Date(a.split('-').reverse().join('-'))
+            const dateB = new Date(b.split('-').reverse().join('-'))
+            return dateA - dateB
+          })
+          // Se obtiene el ultimo dia programado y se crea un objeto Date() a partir del día
+          const ultimoDiaProgramado =
+            fechasProgramadas[fechasProgramadas.length - 1]
+          const [dia, mes, anio] = ultimoDiaProgramado.split('-')
+          const fechaUltimaProgramada = new Date(anio, mes - 1, dia)
+
+          // Si la fecha actual es mayor a la última fecha programada, se desactiva la ruta
+          if (fechaActual > fechaUltimaProgramada) {
+            await editarDocumento(ruta.id, { ...ruta, activo: false })
+          }
+        }
+      }
     } catch (error) {
-      toast.error('Error al obtener la lista de rutas', {
-        position: 'bottom-center',
-      })
+      toast.error('Error al desactivar rutas vencidas')
       console.error(error)
     }
-    setCargandoRutas(false)
   }
 
   const marcarLlegada = async (ruta, fecha, nombreAlmacen) => {
-    const rutaDocRef = doc(db, 'rutas', ruta.id)
-
     try {
       const position = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject)
@@ -66,13 +60,12 @@ function useRutas() {
 
       const almacenRef = [`locaciones.${fecha}.${nombreAlmacen}`]
 
-      await updateDoc(rutaDocRef, {
+      await editarDocumento(ruta.id, {
         [`${almacenRef}.fechaIngreso`]: serverTimestamp(),
         [`${almacenRef}.ubicacionIngreso`]: new GeoPoint(latitude, longitude),
       })
-
-      await obtenerRutas()
     } catch (error) {
+      toast.error(error)
       console.error(error)
       throw error
     }
@@ -93,24 +86,19 @@ function useRutas() {
         [`${almacenRef}.fechaSalida`]: serverTimestamp(),
         [`${almacenRef}.ubicacionSalida`]: new GeoPoint(latitude, longitude),
       })
-
-      await obtenerRutas()
     } catch (error) {
       console.error(error)
       throw error
     }
   }
 
-  const crearRuta = async (nuevaRuta) => {
-    const rutaRef = await addDoc(collection(db, 'rutas'), nuevaRuta)
-    const nuevaRutaData = {
-      id: rutaRef.id,
-      ...nuevaRuta,
-    }
-    setRutas((prevRutas) => [...prevRutas, nuevaRutaData])
+  return {
+    datos: rutas,
+    marcarLlegada,
+    marcarSalida,
+    crearRuta: agregarDocumento,
+    cargandoRutas,
   }
-
-  return { rutas, marcarLlegada, marcarSalida, crearRuta, cargandoRutas }
 }
 
 export default useRutas

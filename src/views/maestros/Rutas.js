@@ -2,27 +2,30 @@ import { startOfWeek, addWeeks, addDays, format } from 'date-fns'
 import { toast } from 'react-toastify'
 import React, { useState, useEffect } from 'react'
 
-import useAlmacenes from '../hooks/useAlmacenes'
-import useRutas from '../hooks/useRutas'
-import useUsuarios from '../hooks/useUsuarios'
+import useFirestore from '../../hooks/useFirestore'
+import useRutas from '../../hooks/useRutas'
 
-function Maestro() {
+// Componentes
+import AcordionRutas from '../../components/rutas/AcordionRutas'
+
+function MaestroRutas() {
   const [almacenesValidos, setAlmacenesValidos] = useState({})
   const [formularioValido, setFormularioValido] = useState(false)
   const [selectedUsuario, setSelectedUsuario] = useState('')
   const [selectedValues, setSelectedValues] = useState({})
   const [usuarioValido, setUsuarioValido] = useState(false)
-  const { almacenes } = useAlmacenes()
   const { crearRuta } = useRutas()
-  const { usuarios } = useUsuarios()
-
-  const [isMounted, setIsMounted] = useState(true)
+  const { datos: almacenes } = useFirestore('almacenes')
+  const { datos: rutas } = useFirestore('rutas')
+  const { datos: usuarios } = useFirestore('usuarios')
+  const [rutasInactivas, setRutasInactivas] = useState([])
+  const [almacenesActivos, setAlmacenesActivos] = useState([])
 
   useEffect(() => {
-    return () => {
-      setIsMounted(false)
-    }
-  }, [])
+    setRutasInactivas(rutas.filter((ruta) => ruta.activo === false))
+    setAlmacenesActivos(almacenes.filter((almacen) => almacen.activo))
+    return resetForm
+  }, [rutas, almacenes])
 
   useEffect(() => {
     const almacenesValidosArray = Object.values(almacenesValidos)
@@ -39,10 +42,19 @@ function Maestro() {
     setFormularioValido(esFormularioValido)
   }, [almacenesValidos])
 
+  const resetForm = () => {
+    setSelectedUsuario('')
+    setSelectedValues({})
+    setUsuarioValido(false)
+    setAlmacenesValidos({})
+    setFormularioValido(false)
+  }
+
   const handleUsuarioChange = (e) => {
     const nombreUsuario = e.target.value.toUpperCase()
     setSelectedUsuario(nombreUsuario)
     setSelectedValues({})
+    setAlmacenesValidos({})
     setUsuarioValido(
       usuarios.some((usuario) => usuario.nombre === nombreUsuario)
     )
@@ -80,7 +92,9 @@ function Maestro() {
 
     setAlmacenesValidos((prevValidos) => ({
       ...prevValidos,
-      [key]: almacenes.some((almacen) => almacen.nombre === selectedValue),
+      [key]: almacenesActivos.some(
+        (almacen) => almacen.nombre === selectedValue
+      ),
     }))
 
     if (selectedValue === '') {
@@ -110,7 +124,6 @@ function Maestro() {
       }
 
       locaciones[fecha][value] = {
-        almacen: value,
         fechaIngreso: '',
         ubicacionIngreso: '',
         fechaSalida: '',
@@ -132,21 +145,17 @@ function Maestro() {
       activo: true,
     }
 
-    await toast.promise(
-      crearRuta(datosRuta),
-      {
-        pending: 'Asignando la ruta...',
-        error: 'Error al asignar la ruta',
-        success: 'Se ha asignado la ruta',
-      },
-      { position: 'bottom-center' }
-    )
-
-    if (isMounted) {
-      setSelectedUsuario('')
-      setSelectedValues({})
-      setUsuarioValido(false)
-    }
+    await toast
+      .promise(
+        crearRuta(datosRuta),
+        {
+          pending: 'Asignando la ruta...',
+          error: 'Error al asignar la ruta',
+          success: 'Se ha asignado la ruta',
+        },
+        { position: 'bottom-center' }
+      )
+      .finally(resetForm)
   }
 
   const renderFechaSelectors = () => {
@@ -175,7 +184,7 @@ function Maestro() {
       const fechaSelector = (
         <div
           key={formattedDate}
-          className='col-12 col-lg-2 text-center mb-3 border rounded bg-light py-2 px-1'
+          className='col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 text-center mb-3 border rounded bg-light py-2 px-1'
         >
           <div>
             {daysOfWeek[i]} {formattedDate}
@@ -198,13 +207,13 @@ function Maestro() {
                   onChange={(e) => handleAlmacenChange(e, formattedDate, 1)}
                 />
                 <datalist id={`opcionesAlmacen-${formattedDate}-1`}>
-                  {almacenes.map((almacen) => (
+                  {almacenesActivos.map((almacen) => (
                     <option key={almacen.id} value={almacen.nombre} />
                   ))}
                 </datalist>
               </div>
 
-              {almacenes.some(
+              {almacenesActivos.some(
                 (almacen) => almacen.nombre === almacen1Value
               ) && (
                 <div>
@@ -224,7 +233,7 @@ function Maestro() {
                     onChange={(e) => handleAlmacenChange(e, formattedDate, 2)}
                   />
                   <datalist id={`opcionesAlmacen-${formattedDate}-2`}>
-                    {almacenes
+                    {almacenesActivos
                       .filter((almacen) => almacen.nombre !== almacen1Value)
                       .map((almacen) => (
                         <option key={almacen.id} value={almacen.nombre} />
@@ -244,55 +253,67 @@ function Maestro() {
   }
 
   return (
-    <div className='mx-5'>
-      <h1 className='text-center'>Maestreo de Rutas</h1>
+    <div className='mx-2'>
+      <h1 className='text-center'>Maestro de Rutas</h1>
       <br />
-      <form onSubmit={handleSubmit} className='needs-validation' noValidate>
-        <div className='input-group mb-3'>
-          <label htmlFor='listaUsuarios' className='input-group-text'>
-            <i className='fas fa-id-card-clip me-1'></i> Promotora:
-          </label>
-          <input
-            className={`form-control rounded-end ${
-              usuarioValido ? 'is-valid' : 'is-invalid'
-            }`}
-            list='datalistOptions'
-            id='listaUsuarios'
-            placeholder='Buscar...'
-            onChange={handleUsuarioChange}
-            value={selectedUsuario}
-            name='nombreUsuario'
-            required
-          />
-          <datalist id='datalistOptions'>
-            {usuarios.map((usuario) => (
-              <option key={usuario.uid} value={usuario.nombre} />
-            ))}
-          </datalist>
-        </div>
+      <section className='rounded border p-2 mb-3'>
+        <h4 className='text-center'>Asignar una nueva ruta</h4>
+        <form onSubmit={handleSubmit} className='needs-validation' noValidate>
+          <div className='input-group mb-3'>
+            <label htmlFor='listaUsuarios' className='input-group-text'>
+              <i className='fas fa-id-card-clip me-1'></i> Promotora:
+            </label>
+            <input
+              className={`form-control rounded-end ${
+                usuarioValido ? 'is-valid' : 'is-invalid'
+              }`}
+              list='datalistOptions'
+              id='listaUsuarios'
+              placeholder='Buscar...'
+              onChange={handleUsuarioChange}
+              value={selectedUsuario}
+              name='nombreUsuario'
+              required
+            />
+            <datalist id='datalistOptions'>
+              {usuarios.map((usuario) => (
+                <option key={usuario.uid} value={usuario.nombre} />
+              ))}
+            </datalist>
+          </div>
 
-        {usuarios.find((u) => u.nombre === selectedUsuario) ? (
-          <>
-            <div className='row'>{renderFechaSelectors()}</div>
-            <div className='text-center'>
-              <button
-                type='submit'
-                className='btn btn-outline-dark'
-                disabled={!formularioValido}
-              >
-                <i className='fas fa-floppy-disk me-2'></i>
-                Guardar
-              </button>
+          {usuarios.find((u) => u.nombre === selectedUsuario) ? (
+            <>
+              <div className='row px-3 d-flex justify-content-center'>
+                {renderFechaSelectors()}
+              </div>
+              <div className='text-center mb-2'>
+                <button
+                  type='submit'
+                  className='btn btn-outline-dark'
+                  disabled={!formularioValido}
+                >
+                  <i className='fas fa-floppy-disk me-2'></i>
+                  Guardar
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className='text-center px-4'>
+              <p className='text-danger fa-bounce'>
+                No se han encontrado resultados
+              </p>
             </div>
-          </>
-        ) : (
-          <p className='text-center text-danger fa-bounce'>
-            No se han encontrado resultados
-          </p>
-        )}
-      </form>
+          )}
+        </form>
+      </section>
+
+      <section className='rounded border p-1'>
+        <h4 className='text-center'>Consultar Rutas Finalizadas</h4>
+        <AcordionRutas rutas={rutasInactivas} />
+      </section>
     </div>
   )
 }
 
-export default Maestro
+export default MaestroRutas

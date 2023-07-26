@@ -9,7 +9,8 @@ import RequireAuth from './components/RequireAuth'
 /* VISTAS */
 import Home from './views/Home'
 import Login from './views/Login'
-import Maestro from './views/Maestro'
+import MaestroRutas from './views/maestros/Rutas'
+import MaestroAlmacenes from './views/maestros/Almacenes'
 import Rutas from './views/Rutas'
 import NotFound404 from './views/NotFound404'
 import Register from './views/Register'
@@ -30,17 +31,24 @@ function App() {
 
   return (
     <Routes>
+      {/* Rutas Públicas */}
       <Route path='/ingreso' element={<Login />} />
       <Route path='/registro' element={<Register />} />
 
       <Route path='/' element={<MainLayout />}>
-        {/* Rutas Privadas */}
+        {/* Rutas De Usuario */}
         <Route element={<RequireAuth allowedRoles={[ROLES.Usuario]} />}>
           <Route path='/' element={<Home />} />
           <Route path='/rutas' element={<Rutas />} />
         </Route>
-        <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
-          <Route path='/maestro' element={<Maestro />} />
+
+        {/* Rutas Administrativas */}
+        <Route
+          path='/maestros'
+          element={<RequireAuth allowedRoles={[ROLES.Admin]} />}
+        >
+          <Route path='/maestros/rutas' element={<MaestroRutas />} />
+          <Route path='/maestros/almacenes' element={<MaestroAlmacenes />} />
         </Route>
       </Route>
 
