@@ -43,8 +43,9 @@ const useFirestore = (collectionName) => {
     } catch (error) {
       toast.error(`Error al agregar el documento en '${collectionName}'`)
       console.error('Error al agregar el documento:', error)
+    } finally {
+      setCargando(false)
     }
-    setCargando(false)
   }
 
   // Función para actualizar un documento en una colección
@@ -63,8 +64,9 @@ const useFirestore = (collectionName) => {
         `Error al actualizar el documento '${collectionName}/${documentId}'`
       )
       console.error('Error al actualizar el documento:', error)
+    } finally {
+      setCargando(false)
     }
-    setCargando(false)
   }
 
   // Función para eliminar un documento de una colección
@@ -79,8 +81,9 @@ const useFirestore = (collectionName) => {
         `Error al eliminar el documento '${collectionName}/${documentId}'`
       )
       console.error('Error al eliminar el documento:', error)
+    } finally {
+      setCargando(true)
     }
-    setCargando(true)
   }
 
   // Suscripcion para actualizar datos en tiempo real

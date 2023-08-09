@@ -51,7 +51,7 @@ function useRutas() {
     }
   }
 
-  const marcarLlegada = async (ruta, fecha, nombreAlmacen) => {
+  const marcarLlegada = async (ruta, fecha, nombreAlmacen, novedad) => {
     try {
       const position = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject)
@@ -63,6 +63,7 @@ function useRutas() {
       await editarDocumento(ruta.id, {
         [`${almacenRef}.fechaIngreso`]: serverTimestamp(),
         [`${almacenRef}.ubicacionIngreso`]: new GeoPoint(latitude, longitude),
+        [`${almacenRef}.novedadIngreso`]: novedad,
       })
     } catch (error) {
       toast.error(error)

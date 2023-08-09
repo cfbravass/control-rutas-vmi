@@ -18,9 +18,9 @@ const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
     a[0].localeCompare(b[0])
   )
 
-  const formatoFecha = (timestamp, formato = 'dd/MM/yyyy HH:mm:ss a') => {
+  const formatoFecha = (timestamp, formato = 'dd-MM-yyyy h:mm a') => {
     const date = timestamp.toDate() // Convierte el objeto Timestamp a un objeto Date
-    return format(date, formato) // Formatea la hora en 'DD/MM/AAAA HH:MM:SS AM/PM'
+    return format(date, formato) // Formatea la hora en 'DD-MM-AAAA HH:MM AM/PM'
   }
 
   const abrirMapa = ({ latitude, longitude, nombre, fecha }) => {
@@ -57,7 +57,7 @@ const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
         data-bs-backdrop='static'
         data-bs-keyboard='false'
       >
-        <div className='modal-dialog'>
+        <div className='modal-dialog modal-lg'>
           <div className='modal-content'>
             <div className='modal-header'>
               <h1 className='modal-title fs-5' id='modalMapaLabel'>
@@ -72,7 +72,7 @@ const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
               ></button>
             </div>
             <div className='modal-body'>
-              <h6>{ruta.nombreUsuario}</h6>
+              <h6>PROMOTORA - {ruta.nombreUsuario}</h6>
 
               <table className='table table-sm table-hover table-bordered'>
                 <thead>
@@ -86,6 +86,9 @@ const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
                     <th scope='col' className='bg-dark text-light'>
                       SALIDA
                     </th>
+                    <th scope='col' className='bg-dark text-light'>
+                      NOVEDADES
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -98,9 +101,12 @@ const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
                             (a) => a.nombre === nombreAlmacen
                           )?.ubicacion
                           abrirMapa({
-                            latitude: ubicacion.latitude,
-                            longitude: ubicacion.longitude,
-                            nombre: nombreAlmacen,
+                            latitude: ubicacion?.latitude || 0,
+                            longitude: ubicacion?.longitude || 0,
+                            nombre:
+                              ubicacion?.latitude && ubicacion?.longitude
+                                ? nombreAlmacen
+                                : 'Ubicación no definida',
                             fecha: '',
                           })
                         }}
@@ -115,7 +121,7 @@ const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
                             abrirMapa({
                               latitude: datosVisita.ubicacionIngreso.latitude,
                               longitude: datosVisita.ubicacionIngreso.longitude,
-                              nombre: nombreAlmacen,
+                              nombre: 'INGRESO',
                               fecha: formatoFecha(datosVisita.fechaIngreso),
                             })
                           }
@@ -133,7 +139,7 @@ const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
                             abrirMapa({
                               latitude: datosVisita.ubicacionSalida.latitude,
                               longitude: datosVisita.ubicacionSalida.longitude,
-                              nombre: nombreAlmacen,
+                              nombre: 'SALIDA',
                               fecha: formatoFecha(datosVisita.fechaSalida),
                             })
                           }
@@ -144,6 +150,9 @@ const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
                       ) : (
                         <th>-o-</th>
                       )}
+                      <th>{`:ingreso: ${
+                        datosVisita.novedadIngreso || ''
+                      } | :salida: ${datosVisita.novedadSalida || ''}`}</th>
                     </tr>
                   ))}
                 </tbody>

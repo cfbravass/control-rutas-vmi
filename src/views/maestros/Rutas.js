@@ -299,7 +299,7 @@ function MaestroRutas() {
               </div>
             </>
           ) : (
-            <div className='text-center px-4'>
+            <div className='text-center px-5'>
               <p className='text-danger fa-bounce'>
                 No se han encontrado resultados
               </p>

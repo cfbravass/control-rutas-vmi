@@ -6,7 +6,7 @@ import logo from '../static/assets/img/vanessa.ico'
 import { ROLES } from '../routes'
 
 const MainLayout = () => {
-  const { logout, userRoles } = useAuth()
+  const { logout, userRoles, currentUser } = useAuth()
 
   return (
     <main>
@@ -87,7 +87,7 @@ const MainLayout = () => {
                   data-bs-toggle='dropdown'
                   aria-expanded='false'
                 >
-                  <i className='fas fa-user'></i>
+                  <i className='fas fa-user'></i> {currentUser.displayName}
                 </NavLink>
 
                 <ul className='dropdown-menu dropdown-menu-end text-center'>
