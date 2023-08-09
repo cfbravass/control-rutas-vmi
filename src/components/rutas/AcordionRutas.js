@@ -1,3 +1,5 @@
+import { isToday } from 'date-fns'
+import { toast } from 'react-toastify'
 import React, { useEffect, useState } from 'react'
 
 import { ROLES } from '../../routes'
@@ -6,18 +8,23 @@ import { useAuth } from '../../contexts/AuthContext'
 /* Componentes */
 import Cargando from '../Cargando'
 import ModalMapa from './ModalMapa'
-import ModalFichaje from './ModalFichaje'
 
 /* Hooks */
 import useFirestore from '../../hooks/useFirestore'
+import useRutas from '../../hooks/useRutas'
+import useAlmacenes from '../../hooks/useAlmacenes'
 
 const AcordionRutas = ({ rutas }) => {
   const { currentUser, userRoles } = useAuth()
-  const { cargando: cargandoRutas } = useFirestore('rutas')
+  const { marcarLlegada, marcarSalida, cargandoRutas } = useRutas()
   const { datos: usuarios } = useFirestore('usuarios')
+  const { datos: almacenes } = useAlmacenes()
+  const [almacActivos, setAlmacActivos] = useState([])
   const [rutasFiltradas, setRutasFiltradas] = useState([])
   const [buscar, setBuscar] = useState('')
   const [maxRutas, setMaxRutas] = useState(10)
+  const [visitaAdicional, setVisitaAdicional] = useState({})
+  const [estadoVisitaAdicional, setEstadoVisitaAdicional] = useState({})
 
   const handleChangeMaxRutas = (e) => {
     const { value } = e.target
@@ -61,6 +68,74 @@ const AcordionRutas = ({ rutas }) => {
     }
   }
 
+  const handleMarcarLlegada = async (ruta, fecha, nombreAlmacen) => {
+    const [dia, mes, anio] = fecha.split('-')
+    const fechaRuta = new Date(anio, mes - 1, dia)
+    if (!isToday(fechaRuta)) {
+      // Si la fecha no coincide, no se marca la llegada
+      toast.warning(
+        'La fecha actual no corresponde a la que se asignó a esta ruta'
+      )
+      return
+    }
+    const novedad = prompt('Ingrese novedades si tuvo alguna o pulse aceptar:')
+
+    if (novedad === null) {
+      return
+    }
+
+    toast.promise(
+      marcarLlegada(ruta, fecha, nombreAlmacen, novedad),
+      {
+        pending: 'Reportando Llegada...',
+        error: 'Error al marcar la llegada.',
+        success: 'Reporte marcado con éxito.',
+      },
+      { position: 'bottom-center' }
+    )
+
+    setVisitaAdicional({ ...visitaAdicional, [fecha]: '' })
+    setEstadoVisitaAdicional({ ...estadoVisitaAdicional, [fecha]: undefined })
+  }
+
+  const handleMarcarSalida = async (ruta, fecha, nombreAlmacen) => {
+    const [dia, mes, anio] = fecha.split('-')
+    const fechaRuta = new Date(anio, mes - 1, dia)
+    if (!isToday(fechaRuta)) {
+      // Si la fecha no coincide, no se marca la salida
+      toast.warning(
+        'La fecha actual no corresponde a la que se asignó a esta ruta'
+      )
+      return
+    }
+    toast.promise(
+      marcarSalida(ruta, fecha, nombreAlmacen),
+      {
+        pending: 'Reportando Salida...',
+        error: 'Error al marcar la salida.',
+        success: 'Reporte marcado con éxito.',
+      },
+      { position: 'bottom-center' }
+    )
+  }
+
+  const handleVisitaAdicional = (e, fecha) => {
+    const { value } = e.target
+    const uppercaseValue = value.toUpperCase()
+    setVisitaAdicional({ ...visitaAdicional, [fecha]: uppercaseValue })
+
+    if (uppercaseValue === '') {
+      setEstadoVisitaAdicional({ ...estadoVisitaAdicional, [fecha]: undefined })
+    } else {
+      setEstadoVisitaAdicional({
+        ...estadoVisitaAdicional,
+        [fecha]: almacActivos.some(
+          (almacen) => almacen.nombre === uppercaseValue
+        ),
+      })
+    }
+  }
+
   useEffect(() => {
     const rutasFiltradas = filtrarRutas(
       '',
@@ -71,42 +146,48 @@ const AcordionRutas = ({ rutas }) => {
     // eslint-disable-next-line
   }, [rutas, userRoles, currentUser.uid])
 
+  useEffect(() => {
+    setAlmacActivos(almacenes.filter((almacen) => almacen.activo))
+  }, [almacenes])
+
   return (
     <>
       <div className='mx-1'>
-        <div className='input-group mb-3'>
-          <label htmlFor='listaPromotoras' className='input-group-text'>
-            <i className='fas fa-id-card-clip me-1'></i> Promotora:
-          </label>
-          <input
-            className='form-control'
-            list='datalistOptions'
-            id='listaPromotoras'
-            placeholder='Buscar...'
-            onChange={(e) => handleBusqueda(e)}
-            value={buscar}
-          />
-          <datalist id='datalistOptions'>
-            {usuarios.map((usuario) => (
-              <option key={usuario.uid} value={usuario.nombre} />
-            ))}
-          </datalist>
-          <label className='input-group-text' htmlFor='maxRutas'>
-            Resultados:
-          </label>
-          <span className='input-group-text'>
+        {userRoles.includes(ROLES.Admin) && (
+          <div className='input-group mb-3'>
+            <label htmlFor='listaPromotoras' className='input-group-text'>
+              <i className='fas fa-id-card-clip me-1'></i> Promotora:
+            </label>
             <input
-              style={{ width: '69px' }}
               className='form-control'
-              type='number'
-              id='maxRutas'
-              min={1}
-              value={maxRutas}
-              step={1}
-              onChange={(e) => handleChangeMaxRutas(e)}
-            ></input>
-          </span>
-        </div>
+              list='listaUsuarios'
+              id='listaPromotoras'
+              placeholder='Buscar...'
+              onChange={(e) => handleBusqueda(e)}
+              value={buscar}
+            />
+            <datalist id='listaUsuarios'>
+              {usuarios.map((usuario) => (
+                <option key={usuario.uid} value={usuario.nombre} />
+              ))}
+            </datalist>
+            <label className='input-group-text' htmlFor='maxRutas'>
+              Resultados:
+            </label>
+            <span className='input-group-text'>
+              <input
+                style={{ width: '69px' }}
+                className='form-control'
+                type='number'
+                id='maxRutas'
+                min={1}
+                value={maxRutas}
+                step={1}
+                onChange={(e) => handleChangeMaxRutas(e)}
+              ></input>
+            </span>
+          </div>
+        )}
 
         {cargandoRutas ? (
           <Cargando />
@@ -166,7 +247,7 @@ const AcordionRutas = ({ rutas }) => {
 
                           return (
                             <div
-                              className='col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 text-center mb-3 border rounded bg-light py-2'
+                              className='col-12 col-sm-6 col-lg-4 text-center mb-3 border rounded bg-light py-2'
                               key={fecha}
                             >
                               <div className='mb-4'>
@@ -194,20 +275,150 @@ const AcordionRutas = ({ rutas }) => {
                                             ''
                                           )}${fecha}`}
                                         >
-                                          <small>{nombreAlmacen}</small>
+                                          <div
+                                            className='btn-group'
+                                            role='group'
+                                            aria-label='Marcar llegada o Salida'
+                                          >
+                                            {!userRoles.includes(
+                                              ROLES.Admin
+                                            ) ? (
+                                              <>
+                                                <button
+                                                  className={`btn btn-sm btn-outline-dark ${
+                                                    !userRoles.includes(
+                                                      ROLES.Admin
+                                                    ) && 'dropdown-toggle'
+                                                  }`}
+                                                  data-bs-toggle={`${
+                                                    !userRoles.includes(
+                                                      ROLES.Admin
+                                                    ) && 'dropdown'
+                                                  }`}
+                                                  aria-expanded='false'
+                                                >
+                                                  {nombreAlmacen}
+                                                </button>
+                                                <ul
+                                                  className='dropdown-menu'
+                                                  aria-labelledby='btnGroupDrop1'
+                                                >
+                                                  {!datosVisita.ubicacionIngreso && (
+                                                    <li>
+                                                      <button
+                                                        className='dropdown-item'
+                                                        onClick={() =>
+                                                          handleMarcarLlegada(
+                                                            ruta,
+                                                            fecha,
+                                                            nombreAlmacen
+                                                          )
+                                                        }
+                                                      >
+                                                        Marcar Ingreso
+                                                      </button>
+                                                    </li>
+                                                  )}
+                                                  {!datosVisita.ubicacionSalida && (
+                                                    <li>
+                                                      <button
+                                                        className='dropdown-item'
+                                                        onClick={() =>
+                                                          handleMarcarSalida(
+                                                            ruta,
+                                                            fecha,
+                                                            nombreAlmacen
+                                                          )
+                                                        }
+                                                      >
+                                                        Marcar Salida
+                                                      </button>
+                                                    </li>
+                                                  )}
+                                                </ul>
+                                              </>
+                                            ) : (
+                                              <p className='m-0'>
+                                                {nombreAlmacen}
+                                              </p>
+                                            )}
+                                          </div>
                                         </li>
                                       )
                                     )}
+                                    {!userRoles.includes(ROLES.Admin) && (
+                                      <li className='list-group-item'>
+                                        <div className='input-group'>
+                                          <input
+                                            className={`form-control ${
+                                              estadoVisitaAdicional[fecha] ===
+                                              true
+                                                ? 'is-valid'
+                                                : estadoVisitaAdicional[
+                                                    fecha
+                                                  ] === false
+                                                ? 'is-invalid'
+                                                : ''
+                                            }`}
+                                            list={`listaAlmacenesAdicionales${fecha}`}
+                                            placeholder='Otro...'
+                                            value={visitaAdicional[fecha] || ''}
+                                            onChange={(e) =>
+                                              handleVisitaAdicional(e, fecha)
+                                            }
+                                          />
+                                          <datalist
+                                            id={`listaAlmacenesAdicionales${fecha}`}
+                                          >
+                                            {almacActivos
+                                              .filter(
+                                                (x) =>
+                                                  !Object.keys(
+                                                    ruta.locaciones[fecha]
+                                                  ).includes(x.nombre)
+                                              )
+                                              .map((almacen) => (
+                                                <option
+                                                  key={almacen.id}
+                                                  value={almacen.nombre}
+                                                />
+                                              ))}
+                                          </datalist>
+                                          <button
+                                            className='btn btn-outline-secondary dropdown-toggle dropdown-toggle-split'
+                                            data-bs-toggle='dropdown'
+                                            aria-expanded='false'
+                                            disabled={
+                                              estadoVisitaAdicional[fecha] !==
+                                              true
+                                            }
+                                          >
+                                            <span className='visually-hidden'>
+                                              Opciones Almacen Adicional
+                                            </span>
+                                          </button>
+                                          <ul className='dropdown-menu dropdown-menu-end'>
+                                            <li>
+                                              <button
+                                                className='dropdown-item'
+                                                onClick={() =>
+                                                  handleMarcarLlegada(
+                                                    ruta,
+                                                    fecha,
+                                                    visitaAdicional[fecha]
+                                                  )
+                                                }
+                                              >
+                                                Marcar Ingreso
+                                              </button>
+                                            </li>
+                                          </ul>
+                                        </div>
+                                      </li>
+                                    )}
                                   </ul>
-                                  {userRoles.includes(ROLES.Admin) ? (
+                                  {userRoles.includes(ROLES.Admin) && (
                                     <ModalMapa
-                                      modalId={`${ruta.id}${fecha}`}
-                                      ruta={ruta}
-                                      fecha={fecha}
-                                      almacenes={ruta.locaciones[fecha]}
-                                    />
-                                  ) : (
-                                    <ModalFichaje
                                       modalId={`${ruta.id}${fecha}`}
                                       ruta={ruta}
                                       fecha={fecha}
