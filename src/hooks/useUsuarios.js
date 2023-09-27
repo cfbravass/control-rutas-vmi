@@ -30,7 +30,7 @@ function useUsuarios() {
     obtenerUsuarios()
   }, [])
 
-  return { usuarios, cargandoUsuarios }
+  return { datos: usuarios, cargando: cargandoUsuarios }
 }
 
 export default useUsuarios

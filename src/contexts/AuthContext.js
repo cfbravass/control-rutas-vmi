@@ -1,4 +1,5 @@
 import { doc, setDoc, getDoc } from 'firebase/firestore'
+import { sendPasswordResetEmail as sendPasswordResetEmailFirebase } from 'firebase/auth'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import { auth, db } from '../firebaseApp'
@@ -21,6 +22,7 @@ const AuthContext = createContext({
   login: null,
   logout: null,
   register: null,
+  sendPasswordResetEmail: null,
   resetPassword: null,
   userData: null,
   userRoles: [],
@@ -101,6 +103,25 @@ export default function AuthContextProvider({ children }) {
     return user
   }
 
+  async function sendPasswordResetEmail(email) {
+    try {
+      await sendPasswordResetEmailFirebase(auth, email)
+      // El correo de restablecimiento de contraseña se ha enviado con éxito.
+      toast.success(
+        'Se ha enviado un correo de restablecimiento de contraseña.'
+      )
+    } catch (error) {
+      // Ocurrió un error al enviar el correo de restablecimiento de contraseña.
+      console.error(
+        'Error al enviar el correo de restablecimiento de contraseña:',
+        error
+      )
+      toast.error(
+        'Ocurrió un error al enviar el correo de restablecimiento de contraseña.'
+      )
+    }
+  }
+
   function resetPassword(oobCode, newPassword) {
     return confirmPasswordReset(auth, oobCode, newPassword)
   }
@@ -124,6 +145,7 @@ export default function AuthContextProvider({ children }) {
     login,
     logout,
     register,
+    sendPasswordResetEmail,
     resetPassword,
     userData,
     userRoles,

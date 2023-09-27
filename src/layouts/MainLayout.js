@@ -68,6 +68,14 @@ const MainLayout = () => {
                         Almacenes
                       </NavLink>
                     </li>
+                    <li>
+                      <NavLink
+                        className='dropdown-item btn btn-light'
+                        to='/maestros/usuarios'
+                      >
+                        Usuarios
+                      </NavLink>
+                    </li>
                   </ul>
                 </li>
               )}

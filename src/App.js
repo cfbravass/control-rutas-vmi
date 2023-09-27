@@ -11,6 +11,7 @@ import Home from './views/Home'
 import Login from './views/Login'
 import MaestroRutas from './views/maestros/Rutas'
 import MaestroAlmacenes from './views/maestros/Almacenes'
+import MaestroUsuarios from './views/maestros/Usuarios'
 import Rutas from './views/Rutas'
 import NotFound404 from './views/NotFound404'
 import Register from './views/Register'
@@ -49,6 +50,7 @@ function App() {
         >
           <Route path='/maestros/rutas' element={<MaestroRutas />} />
           <Route path='/maestros/almacenes' element={<MaestroAlmacenes />} />
+          <Route path='/maestros/usuarios' element={<MaestroUsuarios />} />
         </Route>
       </Route>
 
