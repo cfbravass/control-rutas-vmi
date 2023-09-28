@@ -4,6 +4,7 @@ import useAlmacenes from '../../hooks/useAlmacenes'
 
 import ModalNuevoAlmacen from '../../components/almacenes/ModalNuevo'
 import Cargando from '../../components/Cargando'
+import ModalEditarAlmacen from '../../components/almacenes/ModalEditar'
 
 export default function MaestroAlmacenes() {
   const { datos: almacenes, cargando } = useAlmacenes()
@@ -117,6 +118,9 @@ export default function MaestroAlmacenes() {
                 <th scope='col' className='align-middle'>
                   LONGITUD
                 </th>
+                <th scope='col' className='align-middle text-center'>
+                  ACCIONES
+                </th>
               </tr>
             </thead>
             <tbody className='table-group-divider'>
@@ -143,6 +147,12 @@ export default function MaestroAlmacenes() {
                     <td>{almacen.direccion}</td>
                     <td>{almacen.ubicacion.latitude}</td>
                     <td>{almacen.ubicacion.longitude}</td>
+                    <td className='text-center'>
+                      <ModalEditarAlmacen
+                        idModal={`modalEditarAlmacen${almacen.id}`}
+                        almacen={almacen}
+                      />
+                    </td>
                   </tr>
                 ))
               ) : (

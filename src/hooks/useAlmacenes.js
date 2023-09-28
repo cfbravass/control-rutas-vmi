@@ -6,7 +6,8 @@ import useFirestore from './useFirestore'
 import { toast } from 'react-toastify'
 
 function useAlmacenes() {
-  const { datos, cargando, agregarDocumento } = useFirestore('almacenes')
+  const { datos, cargando, agregarDocumento, editarDocumento } =
+    useFirestore('almacenes')
   const [nombresAlmacenes, setNombresAlmacenes] = useState([])
 
   useEffect(() => {
@@ -38,10 +39,46 @@ function useAlmacenes() {
     }
   }
 
+  const modificarAlmacen = async (id, nuevosDatos) => {
+    const { latitud, longitud, nombre: nuevoNombre } = nuevosDatos
+
+    try {
+      const almacenActual = datos.find((almacen) => almacen.id === id)
+
+      if (!almacenActual) {
+        throw new Error('Almacén no encontrado')
+      }
+
+      const { nombre: nombreActual } = almacenActual
+
+      if (
+        nuevoNombre.trim() !== nombreActual.trim() &&
+        nombresAlmacenes.some((nombre) => nombre === nuevoNombre.trim())
+      ) {
+        toast.error(ERRORES.AlmacenDuplicado)
+        throw new Error(ERRORES.AlmacenDuplicado)
+      }
+
+      const ubicacion = new GeoPoint(parseFloat(latitud), parseFloat(longitud))
+      const datosDocumento = {
+        nombre: nuevoNombre?.trim() || '',
+        ciudad: nuevosDatos.ciudad?.trim() || '',
+        direccion: nuevosDatos.direccion?.trim() || '',
+        ubicacion,
+      }
+
+      await editarDocumento(id, datosDocumento)
+    } catch (error) {
+      console.error(error)
+      throw error
+    }
+  }
+
   return {
     datos,
     cargando,
     crearAlmacen,
+    modificarAlmacen,
   }
 }
 
