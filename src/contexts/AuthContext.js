@@ -97,6 +97,7 @@ export default function AuthContextProvider({ children }) {
       uid: user.uid,
       email,
       roles: ['usuario'],
+      activo: true,
     })
     await updateProfile(user, { displayName: nombre })
 
