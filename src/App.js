@@ -10,6 +10,7 @@ import RequireAuth from './components/RequireAuth'
 import Home from './views/Home'
 import Login from './views/Login'
 import MaestroRutas from './views/maestros/Rutas'
+import AsignarRutasVTM from './views/maestros/AsignarRutasVTM'
 import MaestroAlmacenes from './views/maestros/Almacenes'
 import MaestroUsuarios from './views/maestros/Usuarios'
 import Rutas from './views/Rutas'
@@ -35,6 +36,11 @@ function App() {
       {/* Rutas Públicas */}
       <Route path='/ingreso' element={<Login />} />
       <Route path='/registro' element={<Register />} />
+
+      {/* Rutas para iframe VTM intranet */}
+      <Route path='/vtm' element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
+        <Route path='/vtm/rutas' element={<AsignarRutasVTM />} />
+      </Route>
 
       <Route path='/' element={<MainLayout />}>
         {/* Rutas De Usuario */}
