@@ -5,13 +5,13 @@ import { db } from '../firebaseApp'
 import { toast } from 'react-toastify'
 import useFirestore from './useFirestore'
 
-function useRutas() {
+function useRutas(activo = null) {
   const {
     datos: rutas,
     cargando: cargandoRutas,
     editarDocumento,
     agregarDocumento,
-  } = useFirestore('rutas')
+  } = useFirestore('rutas', activo)
 
   useEffect(() => {
     desactivarRutasVencidas()

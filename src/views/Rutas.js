@@ -1,17 +1,11 @@
 /* Componentes */
-import { useEffect, useState } from 'react'
 import AcordionRutas from '../components/rutas/AcordionRutas'
 
 /* Hooks */
 import useRutas from '../hooks/useRutas'
 
 function Rutas() {
-  const { datos: rutas } = useRutas()
-  const [rutasActivas, setRutasActivas] = useState([])
-
-  useEffect(() => {
-    setRutasActivas(rutas.filter((ruta) => ruta.activo === true))
-  }, [rutas])
+  const { datos: rutasActivas } = useRutas(true)
 
   return (
     <>

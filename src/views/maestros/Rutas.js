@@ -14,18 +14,15 @@ function MaestroRutas() {
   const [selectedUsuario, setSelectedUsuario] = useState('')
   const [selectedValues, setSelectedValues] = useState({})
   const [usuarioValido, setUsuarioValido] = useState(false)
-  const { crearRuta } = useRutas()
+  const { datos: rutasInactivas, crearRuta } = useRutas(false)
   const { datos: almacenes } = useFirestore('almacenes')
-  const { datos: rutas } = useFirestore('rutas')
   const { datos: usuarios } = useFirestore('usuarios')
-  const [rutasInactivas, setRutasInactivas] = useState([])
   const [almacenesActivos, setAlmacenesActivos] = useState([])
 
   useEffect(() => {
-    setRutasInactivas(rutas.filter((ruta) => ruta.activo === false))
     setAlmacenesActivos(almacenes.filter((almacen) => almacen.activo))
     return resetForm
-  }, [rutas, almacenes])
+  }, [almacenes])
 
   useEffect(() => {
     const almacenesValidosArray = Object.values(almacenesValidos)

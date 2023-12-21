@@ -8,11 +8,12 @@ import {
   updateDoc,
   doc,
   deleteDoc,
+  where,
 } from 'firebase/firestore'
 import { db } from '../firebaseApp'
 import { toast } from 'react-toastify'
 
-const useFirestore = (collectionName) => {
+const useFirestore = (collectionName, activo = null) => {
   const [datos, setDatos] = useState([])
   const [cargando, setCargando] = useState(true)
 
@@ -20,7 +21,18 @@ const useFirestore = (collectionName) => {
   const obtenerDocumentos = async () => {
     try {
       setCargando(true)
-      const querySnapshot = await getDocs(collection(db, collectionName))
+
+      let query
+      if (activo !== null) {
+        query = query(
+          collection(db, collectionName),
+          where('activo', '==', activo)
+        )
+      } else {
+        query = collection(db, collectionName)
+      }
+
+      const querySnapshot = await getDocs(query)
       const documents = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -93,10 +105,22 @@ const useFirestore = (collectionName) => {
       (querySnapshot) => {
         try {
           setCargando(true)
-          const documents = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
+
+          let documents
+          if (activo !== null) {
+            documents = querySnapshot.docs
+              .filter((doc) => doc.data().activo === activo)
+              .map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+              }))
+          } else {
+            documents = querySnapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+          }
+
           setDatos(documents)
         } catch (error) {
           toast.error(
@@ -116,7 +140,7 @@ const useFirestore = (collectionName) => {
     return () => {
       unsubscribe()
     }
-  }, [collectionName])
+  }, [collectionName, activo])
 
   return {
     datos,
