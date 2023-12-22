@@ -1,10 +1,7 @@
 import { toast } from 'react-toastify'
 import { useEffect, useState } from 'react'
 
-import useAlmacenes from '../../hooks/useAlmacenes'
-
-export default function ModalNuevoAlmacen() {
-  const { datos: almacenes, crearAlmacen } = useAlmacenes()
+export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
   const [nombresAlmacenes, setNombresAlmacenes] = useState([])
   const [nombreExistente, setNombreExistente] = useState(false)
 

@@ -121,6 +121,7 @@ const useFirestore = (collectionName, activo = null) => {
             }))
           }
 
+          console.log('updateData')
           setDatos(documents)
         } catch (error) {
           toast.error(
@@ -140,6 +141,7 @@ const useFirestore = (collectionName, activo = null) => {
     return () => {
       unsubscribe()
     }
+    // eslint-disable-next-line
   }, [collectionName, activo])
 
   return {

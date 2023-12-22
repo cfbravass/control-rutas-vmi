@@ -2,8 +2,9 @@ import { startOfWeek, addWeeks, addDays, format } from 'date-fns'
 import { toast } from 'react-toastify'
 import React, { useState, useEffect } from 'react'
 
-import useFirestore from '../../hooks/useFirestore'
 import useRutas from '../../hooks/useRutas'
+import useAlmacenes from '../../hooks/useAlmacenes'
+import useUsuarios from '../../hooks/useUsuarios'
 
 // Componentes
 import AcordionRutas from '../../components/rutas/AcordionRutas'
@@ -15,14 +16,8 @@ function MaestroRutas() {
   const [selectedValues, setSelectedValues] = useState({})
   const [usuarioValido, setUsuarioValido] = useState(false)
   const { datos: rutasInactivas, crearRuta } = useRutas(false)
-  const { datos: almacenes } = useFirestore('almacenes')
-  const { datos: usuarios } = useFirestore('usuarios')
-  const [almacenesActivos, setAlmacenesActivos] = useState([])
-
-  useEffect(() => {
-    setAlmacenesActivos(almacenes.filter((almacen) => almacen.activo))
-    return resetForm
-  }, [almacenes])
+  const { datos: almacenesActivos } = useAlmacenes(true)
+  const { datos: usuarios } = useUsuarios()
 
   useEffect(() => {
     const almacenesValidosArray = Object.values(almacenesValidos)
@@ -307,7 +302,11 @@ function MaestroRutas() {
 
       <section className='rounded border p-1'>
         <h4 className='text-center'>Consultar Rutas Finalizadas</h4>
-        <AcordionRutas rutas={rutasInactivas} />
+        <AcordionRutas
+          rutas={rutasInactivas}
+          usuarios={usuarios}
+          almacenes={almacenesActivos}
+        />
       </section>
     </div>
   )

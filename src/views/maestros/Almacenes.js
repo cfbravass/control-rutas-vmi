@@ -7,7 +7,12 @@ import Cargando from '../../components/Cargando'
 import ModalEditarAlmacen from '../../components/almacenes/ModalEditar'
 
 export default function MaestroAlmacenes() {
-  const { datos: almacenes, cargando } = useAlmacenes()
+  const {
+    datos: almacenes,
+    cargando,
+    crearAlmacen,
+    modificarAlmacen,
+  } = useAlmacenes()
   const [ciudades, setCiudades] = useState([])
   const [buscarNombre, setBuscarNombre] = useState('')
   const [buscarCiudad, setBuscarCiudad] = useState('')
@@ -62,7 +67,7 @@ export default function MaestroAlmacenes() {
       <section className='mx-5'>
         <h1 className='text-center mb-4'>Maestro de Almacenes</h1>
 
-        <ModalNuevoAlmacen />
+        <ModalNuevoAlmacen almacenes={almacenes} crearAlmacen={crearAlmacen} />
         <div className='table-responsive'>
           <table className='table table-hover table-bordered caption-top'>
             <caption>
@@ -151,6 +156,8 @@ export default function MaestroAlmacenes() {
                       <ModalEditarAlmacen
                         idModal={`modalEditarAlmacen${almacen.id}`}
                         almacen={almacen}
+                        almacenes={almacenes}
+                        modificarAlmacen={modificarAlmacen}
                       />
                     </td>
                   </tr>

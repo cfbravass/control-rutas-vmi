@@ -104,7 +104,7 @@ export default function MaestroUsuarios() {
                         onClick={() => {
                           handleResetPassword(usuario.email)
                         }}
-                        class='fas fa-unlock-keyhole mx-2 text-warning'
+                        className='fas fa-unlock-keyhole mx-2 text-warning'
                         role='button'
                         title='Cambiar Contraseña'
                       ></i>
@@ -115,7 +115,7 @@ export default function MaestroUsuarios() {
                         onClick={() => {
                           navigator.clipboard.writeText(usuario.uid)
                         }}
-                        class='far fa-copy mx-2'
+                        className='far fa-copy mx-2'
                         role='button'
                         title='Copiar'
                       ></i>

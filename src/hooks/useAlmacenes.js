@@ -5,9 +5,11 @@ import { ERRORES } from '../errores'
 import useFirestore from './useFirestore'
 import { toast } from 'react-toastify'
 
-function useAlmacenes() {
-  const { datos, cargando, agregarDocumento, editarDocumento } =
-    useFirestore('almacenes')
+function useAlmacenes(activo = null) {
+  const { datos, cargando, agregarDocumento, editarDocumento } = useFirestore(
+    'almacenes',
+    activo
+  )
   const [nombresAlmacenes, setNombresAlmacenes] = useState([])
 
   useEffect(() => {

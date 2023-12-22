@@ -2,11 +2,9 @@ import { format } from 'date-fns'
 import { useState } from 'react'
 
 import Mapa from '../Mapa'
-import useAlmacenes from '../../hooks/useAlmacenes'
 
-const ModalMapa = ({ modalId, ruta, fecha, almacenes }) => {
+const ModalMapa = ({ modalId, ruta, fecha, almacenes, datosAlmacenes }) => {
   const [mostrarMapa, setMostrarMapa] = useState(false)
-  const { datos: datosAlmacenes } = useAlmacenes()
   const [infoMapa, setInfoMapa] = useState({
     latitude: 0,
     longitude: 0,

@@ -9,17 +9,15 @@ import { useAuth } from '../../contexts/AuthContext'
 import Cargando from '../Cargando'
 import ModalMapa from './ModalMapa'
 
-/* Hooks */
-import useFirestore from '../../hooks/useFirestore'
-import useRutas from '../../hooks/useRutas'
-import useAlmacenes from '../../hooks/useAlmacenes'
-
-const AcordionRutas = ({ rutas }) => {
+const AcordionRutas = ({
+  rutas,
+  marcarLlegada,
+  marcarSalida,
+  cargandoRutas,
+  usuarios,
+  almacenes,
+}) => {
   const { currentUser, userRoles } = useAuth()
-  const { marcarLlegada, marcarSalida, cargandoRutas } = useRutas()
-  const { datos: usuarios } = useFirestore('usuarios')
-  const { datos: almacenes } = useAlmacenes()
-  const [almacActivos, setAlmacActivos] = useState([])
   const [rutasFiltradas, setRutasFiltradas] = useState([])
   const [buscar, setBuscar] = useState('')
   const [maxRutas, setMaxRutas] = useState(10)
@@ -129,9 +127,7 @@ const AcordionRutas = ({ rutas }) => {
     } else {
       setEstadoVisitaAdicional({
         ...estadoVisitaAdicional,
-        [fecha]: almacActivos.some(
-          (almacen) => almacen.nombre === uppercaseValue
-        ),
+        [fecha]: almacenes.some((almacen) => almacen.nombre === uppercaseValue),
       })
     }
   }
@@ -146,10 +142,6 @@ const AcordionRutas = ({ rutas }) => {
     // eslint-disable-next-line
   }, [rutas, userRoles, currentUser.uid])
 
-  useEffect(() => {
-    setAlmacActivos(almacenes.filter((almacen) => almacen.activo))
-  }, [almacenes])
-
   return (
     <>
       <div className='mx-1'>
@@ -160,13 +152,13 @@ const AcordionRutas = ({ rutas }) => {
             </label>
             <input
               className='form-control'
-              list='listaUsuarios'
+              list='listadoUsuarios'
               id='listaPromotoras'
               placeholder='Buscar...'
               onChange={(e) => handleBusqueda(e)}
               value={buscar}
             />
-            <datalist id='listaUsuarios'>
+            <datalist id='listadoUsuarios'>
               {usuarios.map((usuario) => (
                 <option key={usuario.uid} value={usuario.nombre} />
               ))}
@@ -370,7 +362,7 @@ const AcordionRutas = ({ rutas }) => {
                                           <datalist
                                             id={`listaAlmacenesAdicionales${fecha}`}
                                           >
-                                            {almacActivos
+                                            {almacenes
                                               .filter(
                                                 (x) =>
                                                   !Object.keys(
@@ -423,6 +415,7 @@ const AcordionRutas = ({ rutas }) => {
                                       ruta={ruta}
                                       fecha={fecha}
                                       almacenes={ruta.locaciones[fecha]}
+                                      datosAlmacenes={almacenes}
                                     />
                                   )}
                                 </div>
