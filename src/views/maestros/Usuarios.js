@@ -7,7 +7,11 @@ import Cargando from '../../components/Cargando'
 
 export default function MaestroUsuarios() {
   const { sendPasswordResetEmail } = useAuth()
-  const { datos: usuarios, cargando } = useUsuarios()
+  const {
+    datos: usuarios,
+    cargando,
+    editarDocumento: editarUsuario,
+  } = useUsuarios()
   const [buscarNombre, setBuscarNombre] = useState('')
   const [usuariosFiltrados, setUsuariosFiltrados] = useState([])
 
@@ -17,6 +21,15 @@ export default function MaestroUsuarios() {
     )
     if (result === true) {
       await sendPasswordResetEmail(email)
+    }
+  }
+
+  const handleDesactivarUsuario = async (uid) => {
+    var result = window.confirm(
+      'Estás a punto de inhabilitar una cuenta de usuario'
+    )
+    if (result === true) {
+      await editarUsuario(uid, { activo: false })
     }
   }
 
@@ -90,13 +103,18 @@ export default function MaestroUsuarios() {
                 usuariosFiltrados.map((usuario) => (
                   <tr key={usuario.uid}>
                     <th scope='row' className='text-center'>
-                      <i
-                        className={`fas fa-circle-${
-                          usuario.uid
-                            ? 'check text-success'
-                            : 'xmark text-danger'
-                        }`}
-                      ></i>
+                      {usuario.activo ? (
+                        <i
+                          onClick={() => {
+                            handleDesactivarUsuario(usuario.uid)
+                          }}
+                          role='button'
+                          title='Desactivar Usuario'
+                          className='fas fa-circle-check text-success'
+                        ></i>
+                      ) : (
+                        <i className='fas fa-circle-xmark text-danger'></i>
+                      )}
                     </th>
                     <td>{usuario.nombre}</td>
                     <td>

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 
 import useFirestore from '../../hooks/useFirestore'
 import useRutas from '../../hooks/useRutas'
+import useUsuarios from '../../hooks/useUsuarios'
 
 function AsignarRutasVTM() {
   const [almacenesValidos, setAlmacenesValidos] = useState({})
@@ -13,7 +14,7 @@ function AsignarRutasVTM() {
   const [usuarioValido, setUsuarioValido] = useState(false)
   const { crearRuta } = useRutas()
   const { datos: almacenes } = useFirestore('almacenes')
-  const { datos: usuarios } = useFirestore('usuarios')
+  const { datos: usuarios } = useUsuarios(true)
   const [almacenesActivos, setAlmacenesActivos] = useState([])
 
   useEffect(() => {

@@ -48,7 +48,9 @@ function MaestroRutas() {
     setSelectedValues({})
     setAlmacenesValidos({})
     setUsuarioValido(
-      usuarios.some((usuario) => usuario.nombre === nombreUsuario)
+      usuarios
+        .filter((u) => u.activo)
+        .some((usuario) => usuario.nombre === nombreUsuario)
     )
     setFormularioValido(false)
   }
@@ -268,13 +270,17 @@ function MaestroRutas() {
               required
             />
             <datalist id='datalistOptions'>
-              {usuarios.map((usuario) => (
-                <option key={usuario.uid} value={usuario.nombre} />
-              ))}
+              {usuarios
+                .filter((u) => u.activo)
+                .map((usuario) => (
+                  <option key={usuario.uid} value={usuario.nombre} />
+                ))}
             </datalist>
           </div>
 
-          {usuarios.find((u) => u.nombre === selectedUsuario) ? (
+          {usuarios
+            .filter((u) => u.activo)
+            .find((u) => u.nombre === selectedUsuario) ? (
             <>
               <div className='row px-3 d-flex justify-content-center'>
                 {renderFechaSelectors()}

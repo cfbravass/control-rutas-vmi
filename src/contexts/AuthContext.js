@@ -49,6 +49,16 @@ export default function AuthContextProvider({ children }) {
         setLoadingAuth(true)
         setCurrentUser(user)
         getUserData(user.uid).then((userData) => {
+          if (!userData.activo) {
+            toast.dismiss('loadingAuth')
+            toast.error('Tu usuario se encuentra inactivo')
+            setCurrentUser({})
+            setUserData(null)
+            setUserRoles([])
+            setLoadingAuth(false)
+            logout()
+          }
+
           setUserData(userData)
           setUserRoles(userData.roles || [])
           setLoadingAuth(false)

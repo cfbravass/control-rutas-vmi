@@ -38,7 +38,7 @@ function Login() {
         toast.update(id, {
           render: 'Ingresaste correctamente',
           type: toast.TYPE.SUCCESS,
-          autoClose: 3000,
+          autoClose: 1500,
           hideProgressBar: true,
           isLoading: false,
           pauseOnHover: false,

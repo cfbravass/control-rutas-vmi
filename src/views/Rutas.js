@@ -14,7 +14,7 @@ function Rutas() {
     cargandoRutas,
   } = useRutas(true)
 
-  const { datos: usuarios } = useUsuarios()
+  const { datos: usuarios } = useUsuarios(true)
   const { datos: almacenes } = useAlmacenes()
 
   return (

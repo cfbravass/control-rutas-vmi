@@ -68,7 +68,7 @@ const useFirestore = (collectionName, activo = null) => {
       await updateDoc(documentRef, updatedData)
       setDatos((prevData) =>
         prevData.map((doc) =>
-          doc.id === documentId ? { id: doc.id, ...updatedData } : doc
+          doc.id === documentId ? { id: doc.id, ...doc, ...updatedData } : doc
         )
       )
     } catch (error) {
@@ -121,7 +121,6 @@ const useFirestore = (collectionName, activo = null) => {
             }))
           }
 
-          console.log('updateData')
           setDatos(documents)
         } catch (error) {
           toast.error(

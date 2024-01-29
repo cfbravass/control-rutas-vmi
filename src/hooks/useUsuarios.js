@@ -1,9 +1,9 @@
 import useFirestore from './useFirestore'
 
-function useUsuarios() {
-  const { datos, cargando } = useFirestore('usuarios')
+function useUsuarios(activo = null) {
+  const { datos, cargando, editarDocumento } = useFirestore('usuarios', activo)
 
-  return { datos, cargando }
+  return { datos, cargando, editarDocumento }
 }
 
 export default useUsuarios
