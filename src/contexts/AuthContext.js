@@ -38,38 +38,52 @@ export default function AuthContextProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      toast.loading('Validando permisos...', {
-        position: toast.POSITION.BOTTOM_CENTER,
-        autoClose: true,
-        hideProgressBar: true,
-        toastId: 'loadingAuth',
-      })
-
       if (user) {
+        toast.update('loginToast', {
+          render: 'Validando permisos...',
+          hideProgressBar: false,
+          autoClose: 5000,
+          isLoading: true,
+          pauseOnHover: false,
+        })
+
         setLoadingAuth(true)
         setCurrentUser(user)
         getUserData(user.uid).then((userData) => {
           if (!userData.activo) {
-            toast.dismiss('loadingAuth')
-            toast.error('Tu usuario se encuentra inactivo')
+            toast.update('loginToast', {
+              render: 'Tu cuenta de usuario se encuentra inactiva',
+              type: toast.TYPE.ERROR,
+              hideProgressBar: false,
+              autoClose: 3003,
+              isLoading: false,
+              pauseOnHover: false,
+            })
             setCurrentUser({})
             setUserData(null)
             setUserRoles([])
             setLoadingAuth(false)
             logout()
+          } else {
+            toast.update('loginToast', {
+              render: 'Ingresaste correctamente',
+              type: toast.TYPE.SUCCESS,
+              hideProgressBar: true,
+              autoClose: 3003,
+              isLoading: false,
+              pauseOnHover: false,
+            })
           }
 
           setUserData(userData)
           setUserRoles(userData.roles || [])
           setLoadingAuth(false)
-          toast.dismiss('loadingAuth')
         })
       } else {
         setCurrentUser({})
         setUserData(null)
         setUserRoles([])
         setLoadingAuth(false)
-        toast.dismiss('loadingAuth')
       }
     })
     return () => {

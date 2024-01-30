@@ -29,21 +29,11 @@ function Login() {
 
     const id = toast.loading('Iniciando sesión...', {
       position: toast.POSITION.BOTTOM_CENTER,
+      toastId: 'loginToast',
     })
 
     try {
-      const user = await login(email, password)
-
-      if (user) {
-        toast.update(id, {
-          render: 'Ingresaste correctamente',
-          type: toast.TYPE.SUCCESS,
-          autoClose: 1500,
-          hideProgressBar: true,
-          isLoading: false,
-          pauseOnHover: false,
-        })
-      }
+      await login(email, password)
     } catch (error) {
       if (error.code === 'auth/user-not-found') {
         toast.update(id, {
