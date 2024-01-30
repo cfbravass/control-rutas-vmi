@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 
 import useFirestore from '../../hooks/useFirestore'
 import useRutas from '../../hooks/useRutas'
-import useUsuarios from '../../hooks/useUsuarios'
+import { useUsuarios } from '../../contexts/UsuariosContext'
 
 function AsignarRutasVTM() {
   const [almacenesValidos, setAlmacenesValidos] = useState({})
@@ -14,7 +14,7 @@ function AsignarRutasVTM() {
   const [usuarioValido, setUsuarioValido] = useState(false)
   const { crearRuta } = useRutas()
   const { datos: almacenes } = useFirestore('almacenes')
-  const { datos: usuarios } = useUsuarios(true)
+  const { obtenerUsuariosActivos } = useUsuarios()
   const [almacenesActivos, setAlmacenesActivos] = useState([])
 
   useEffect(() => {
@@ -51,7 +51,9 @@ function AsignarRutasVTM() {
     setSelectedValues({})
     setAlmacenesValidos({})
     setUsuarioValido(
-      usuarios.some((usuario) => usuario.nombre === nombreUsuario)
+      obtenerUsuariosActivos().some(
+        (usuario) => usuario.nombre === nombreUsuario
+      )
     )
     setFormularioValido(false)
   }
@@ -135,7 +137,9 @@ function AsignarRutasVTM() {
 
     const datosRuta = {
       nombreUsuario: selectedUsuario,
-      uidUsuario: usuarios.find((u) => u.nombre === selectedUsuario)?.uid,
+      uidUsuario: obtenerUsuariosActivos().find(
+        (u) => u.nombre === selectedUsuario
+      )?.uid,
       locaciones,
       activo: true,
     }
@@ -268,13 +272,15 @@ function AsignarRutasVTM() {
               required
             />
             <datalist id='datalistOptions'>
-              {usuarios.map((usuario) => (
+              {obtenerUsuariosActivos().map((usuario) => (
                 <option key={usuario.uid} value={usuario.nombre} />
               ))}
             </datalist>
           </div>
 
-          {usuarios.find((u) => u.nombre === selectedUsuario) ? (
+          {obtenerUsuariosActivos().find(
+            (u) => u.nombre === selectedUsuario
+          ) ? (
             <>
               <div className='row px-3 d-flex justify-content-center'>
                 {renderFechaSelectors()}

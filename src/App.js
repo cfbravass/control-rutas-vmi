@@ -38,7 +38,7 @@ function App() {
       <Route path='/registro' element={<Register />} />
 
       {/* Rutas para iframe VTM intranet */}
-      <Route path='/vtm' element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
+      <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
         <Route path='/vtm/rutas' element={<AsignarRutasVTM />} />
       </Route>
 

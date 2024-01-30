@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 
-import useUsuarios from '../../hooks/useUsuarios'
+import { useUsuarios } from '../../contexts/UsuariosContext'
 
 import Cargando from '../../components/Cargando'
 

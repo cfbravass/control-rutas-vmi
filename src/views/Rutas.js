@@ -4,7 +4,7 @@ import useAlmacenes from '../hooks/useAlmacenes'
 
 /* Hooks */
 import useRutas from '../hooks/useRutas'
-import useUsuarios from '../hooks/useUsuarios'
+import { useUsuarios } from '../contexts/UsuariosContext'
 
 function Rutas() {
   const {
@@ -14,7 +14,7 @@ function Rutas() {
     cargandoRutas,
   } = useRutas(true)
 
-  const { datos: usuarios } = useUsuarios(true)
+  const { obtenerUsuariosActivos } = useUsuarios()
   const { datos: almacenes } = useAlmacenes()
 
   return (
@@ -27,7 +27,7 @@ function Rutas() {
           marcarLlegada={marcarLlegada}
           marcarSalida={marcarSalida}
           cargandoRutas={cargandoRutas}
-          usuarios={usuarios}
+          usuarios={obtenerUsuariosActivos()}
           almacenes={almacenes}
         />
       </div>

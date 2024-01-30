@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 
 import useRutas from '../../hooks/useRutas'
 import useAlmacenes from '../../hooks/useAlmacenes'
-import useUsuarios from '../../hooks/useUsuarios'
+import { useUsuarios } from '../../contexts/UsuariosContext'
 
 // Componentes
 import AcordionRutas from '../../components/rutas/AcordionRutas'
