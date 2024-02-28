@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
 
-import useAlmacenes from '../../hooks/useAlmacenes'
-
 import ModalNuevoAlmacen from '../../components/almacenes/ModalNuevo'
 import Cargando from '../../components/Cargando'
 import ModalEditarAlmacen from '../../components/almacenes/ModalEditar'
+import { useAlmacenes } from '../../contexts/AlmacenesContext'
 
 export default function MaestroAlmacenes() {
   const {

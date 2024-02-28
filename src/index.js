@@ -8,17 +8,20 @@ import App from './App'
 import AuthContextProvider from './contexts/AuthContext'
 import NotifyContextProvider from './contexts/NotifyContext'
 import { UsuariosProvider } from './contexts/UsuariosContext'
+import { AlmacenesProvider } from './contexts/AlmacenesContext'
 
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthContextProvider>
         <UsuariosProvider>
-          <NotifyContextProvider>
-            <Routes>
-              <Route path='/*' element={<App />} />
-            </Routes>
-          </NotifyContextProvider>
+          <AlmacenesProvider>
+            <NotifyContextProvider>
+              <Routes>
+                <Route path='/*' element={<App />} />
+              </Routes>
+            </NotifyContextProvider>
+          </AlmacenesProvider>
         </UsuariosProvider>
       </AuthContextProvider>
     </BrowserRouter>

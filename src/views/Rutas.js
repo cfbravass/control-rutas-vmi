@@ -1,10 +1,10 @@
 /* Componentes */
 import AcordionRutas from '../components/rutas/AcordionRutas'
-import useAlmacenes from '../hooks/useAlmacenes'
 
 /* Hooks */
-import useRutas from '../hooks/useRutas'
+import { useAlmacenes } from '../contexts/AlmacenesContext'
 import { useUsuarios } from '../contexts/UsuariosContext'
+import useRutas from '../hooks/useRutas'
 
 function Rutas() {
   const {

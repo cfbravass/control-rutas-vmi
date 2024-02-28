@@ -1,21 +1,51 @@
-import { GeoPoint } from 'firebase/firestore'
-import { useEffect, useState } from 'react'
-
 import { ERRORES } from '../errores'
-import useFirestore from './useFirestore'
+import { GeoPoint } from 'firebase/firestore'
 import { toast } from 'react-toastify'
+import React, { createContext, useContext } from 'react'
+import useFirestore from '../hooks/useFirestore'
 
-function useAlmacenes(activo = null) {
-  const { datos, cargando, agregarDocumento, editarDocumento } = useFirestore(
-    'almacenes',
-    activo
+const AlmacenesContext = createContext()
+
+export const AlmacenesProvider = ({ children }) => {
+  const { datos, cargando, agregarDocumento, editarDocumento } =
+    useFirestore('almacenes')
+  const nombresAlmacenes = datos.map((almacen) => almacen.nombre)
+
+  return (
+    <AlmacenesContext.Provider
+      value={{
+        datos,
+        cargando,
+        agregarDocumento,
+        editarDocumento,
+        nombresAlmacenes,
+      }}
+    >
+      {children}
+    </AlmacenesContext.Provider>
   )
-  const [nombresAlmacenes, setNombresAlmacenes] = useState([])
+}
 
-  useEffect(() => {
-    // Creamos una lista de nombres de todos los almacenes
-    setNombresAlmacenes(datos.map((almacen) => almacen.nombre))
-  }, [datos])
+export const useAlmacenes = () => {
+  const context = useContext(AlmacenesContext)
+  if (!context) {
+    throw new Error(
+      'useAlmacenes debe ser utilizado dentro de AlmacenesProvider'
+    )
+  }
+
+  const {
+    datos,
+    cargando,
+    agregarDocumento,
+    editarDocumento,
+    nombresAlmacenes,
+  } = context
+
+  // Nueva función para obtener solo almacenes activos
+  const obtenerAlmacenesActivos = () => {
+    return datos.filter((almacen) => almacen.activo === true)
+  }
 
   const crearAlmacen = async (datos) => {
     const { latitud, longitud } = datos
@@ -81,7 +111,7 @@ function useAlmacenes(activo = null) {
     cargando,
     crearAlmacen,
     modificarAlmacen,
+    nombresAlmacenes,
+    obtenerAlmacenesActivos,
   }
 }
-
-export default useAlmacenes

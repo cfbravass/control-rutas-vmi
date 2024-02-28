@@ -3,8 +3,8 @@ import { toast } from 'react-toastify'
 import React, { useState, useEffect } from 'react'
 
 import useRutas from '../../hooks/useRutas'
-import useAlmacenes from '../../hooks/useAlmacenes'
 import { useUsuarios } from '../../contexts/UsuariosContext'
+import { useAlmacenes } from '../../contexts/AlmacenesContext'
 
 // Componentes
 import AcordionRutas from '../../components/rutas/AcordionRutas'
