@@ -167,7 +167,6 @@ const useFirestore = (collectionName, activo = null) => {
         }
       }
     )
-    console.log(collectionName)
 
     // Cancelar la suscripción cuando el componente se desmonte
     return () => {

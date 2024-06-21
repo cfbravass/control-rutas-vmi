@@ -3,6 +3,7 @@ import { es } from 'date-fns/locale'
 import { toast } from 'react-toastify'
 import DatePicker from 'react-datepicker'
 import React, { useState, useEffect } from 'react'
+import { Timestamp } from 'firebase/firestore'
 
 import useRutas from '../../hooks/useRutas'
 import { useUsuarios } from '../../contexts/UsuariosContext'
@@ -131,13 +132,22 @@ function MaestroRutas() {
     const agrupacionPorFecha = {}
 
     for (const [key, value] of Object.entries(selectedValues)) {
-      const [fecha] = key.split('_')
+      let [fecha] = key.split('_')
+
+      fecha = new Date(fecha.split('-').reverse().join('-')).setHours(
+        0,
+        0,
+        0,
+        0
+      )
+
+      fecha = Timestamp.fromDate(fecha)
 
       if (!agrupacionPorFecha[fecha]) {
         agrupacionPorFecha[fecha] = {
           nombreUsuario,
           uidUsuario,
-          fecha: fecha,
+          fecha,
           almacenes: [value], // Iniciar con el primer almacen encontrado
           activo: true,
         }
