@@ -3,6 +3,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 import 'react-toastify/dist/ReactToastify.min.css'
+import 'react-datepicker/dist/react-datepicker.css'
 
 import App from './App'
 import AuthContextProvider from './contexts/AuthContext'
