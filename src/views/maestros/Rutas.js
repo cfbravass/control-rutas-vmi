@@ -1,21 +1,23 @@
-import { startOfWeek, addWeeks, addDays, format } from 'date-fns'
+import { addDays, format } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { toast } from 'react-toastify'
+import DatePicker from 'react-datepicker'
 import React, { useState, useEffect } from 'react'
 
 import useRutas from '../../hooks/useRutas'
 import { useUsuarios } from '../../contexts/UsuariosContext'
 import { useAlmacenes } from '../../contexts/AlmacenesContext'
 
-// Componentes
-import AcordionRutas from '../../components/rutas/AcordionRutas'
-
 function MaestroRutas() {
+  const [startDate, setStartDate] = useState(new Date())
+  const [endDate, setEndDate] = useState(startDate)
+
   const [almacenesValidos, setAlmacenesValidos] = useState({})
   const [formularioValido, setFormularioValido] = useState(false)
   const [selectedUsuario, setSelectedUsuario] = useState('')
   const [selectedValues, setSelectedValues] = useState({})
   const [usuarioValido, setUsuarioValido] = useState(false)
-  const { datos: rutasInactivas, crearRuta } = useRutas(false)
+  const { crearRuta } = useRutas(false)
   const { datos: almacenesActivos } = useAlmacenes(true)
   const { datos: usuarios } = useUsuarios()
 
@@ -40,6 +42,16 @@ function MaestroRutas() {
     setUsuarioValido(false)
     setAlmacenesValidos({})
     setFormularioValido(false)
+  }
+
+  const handleDateChange = (dates) => {
+    const [start, end] = dates
+
+    // Mantén startDate siempre actualizado
+    setStartDate(start || new Date())
+
+    // Actualiza endDate solo si se selecciona un rango
+    setEndDate(end || null)
   }
 
   const handleUsuarioChange = (e) => {
@@ -107,82 +119,89 @@ function MaestroRutas() {
       return null
     }
 
-    const locaciones = {}
-
-    for (const [key, value] of Object.entries(selectedValues)) {
-      // eslint-disable-next-line
-      const [fecha, almacenIndex] = key.split('_')
-
-      if (!locaciones[fecha]) {
-        locaciones[fecha] = {}
-      }
-
-      locaciones[fecha][value] = {
-        fechaIngreso: '',
-        ubicacionIngreso: '',
-        fechaSalida: '',
-        ubicacionSalida: '',
-      }
-    }
-
-    const locacionesKeys = Object.keys(locaciones)
-
-    if (locacionesKeys.length === 0) {
+    if (Object.keys(selectedValues).length === 0) {
       toast.warning('No hay datos para guardar')
       return null
     }
 
-    const datosRuta = {
-      nombreUsuario: selectedUsuario,
-      uidUsuario: usuarios.find((u) => u.nombre === selectedUsuario)?.uid,
-      locaciones,
-      activo: true,
+    const nombreUsuario = selectedUsuario
+    const uidUsuario = usuarios.find((u) => u.nombre === selectedUsuario)?.uid
+
+    // Objeto para agrupar por fecha
+    const agrupacionPorFecha = {}
+
+    for (const [key, value] of Object.entries(selectedValues)) {
+      const [fecha] = key.split('_')
+
+      if (!agrupacionPorFecha[fecha]) {
+        agrupacionPorFecha[fecha] = {
+          nombreUsuario,
+          uidUsuario,
+          fecha: fecha,
+          almacenes: [value], // Iniciar con el primer almacen encontrado
+          activo: true,
+        }
+      } else {
+        // Si la fecha ya fue agregada, simplemente añadimos el almacen al array existente
+        agrupacionPorFecha[fecha].almacenes.push(value)
+      }
     }
 
-    await toast
-      .promise(
-        crearRuta(datosRuta),
-        {
-          pending: 'Asignando la ruta...',
-          error: 'Error al asignar la ruta',
-          success: 'Se ha asignado la ruta',
-        },
-        { position: 'bottom-center' }
-      )
+    let promesasDeCreacion = []
+
+    for (const datosRuta of Object.values(agrupacionPorFecha)) {
+      // En este punto, cada `datosRuta` ya tiene su `almacenes` consolidado por fecha
+      promesasDeCreacion.push(crearRuta(datosRuta))
+    }
+
+    await Promise.allSettled(promesasDeCreacion)
+      .then((resultados) => {
+        // Contadores para éxito y fallos
+        const exitos = resultados.filter(
+          (resultado) => resultado.status === 'fulfilled'
+        ).length
+        const fallos = resultados.length - exitos // Cualquier resultado no 'fulfilled' se considera un fallo
+
+        // Lógica para decidir qué mensaje mostrar
+        if (exitos === resultados.length) {
+          // Todos los intentos fueron exitosos
+          toast.success('Las rutas han sido asignadas correctamente')
+        } else if (fallos === resultados.length) {
+          // Todos los intentos fallaron
+          toast.error('No se pudieron asignar las rutas')
+        } else {
+          // Algunos intentos fueron exitosos y otros fallaron
+          toast.warning(
+            `Se asignaron ${exitos} rutas correctamente, pero ${fallos} no se pudieron asignar.`
+          )
+        }
+      })
       .finally(resetForm)
   }
 
   const renderFechaSelectors = () => {
-    const startDate = startOfWeek(addWeeks(new Date(), 1), { weekStartsOn: 1 })
-    const daysOfWeek = [
-      'Lunes',
-      'Martes',
-      'Miércoles',
-      'Jueves',
-      'Viernes',
-      'Sábado',
-      'Domingo',
-    ]
     const fechaSelectors = []
+    let currentDate = startDate
 
-    for (let i = 0; i < 6; i++) {
-      const date = addDays(startDate, i)
-      const formattedDate = format(date, 'dd-MM-yyyy')
+    while (currentDate <= endDate) {
+      const formattedDate = format(currentDate, 'dd-MM-yyyy', {
+        locale: es,
+      })
 
       const almacen1Key = `${formattedDate}_almacen1`
       const almacen2Key = `${formattedDate}_almacen2`
+      const almacen3Key = `${formattedDate}_almacen3`
 
       const almacen1Value = selectedValues[almacen1Key] || ''
       const almacen2Value = selectedValues[almacen2Key] || ''
+      const almacen3Value = selectedValues[almacen3Key] || ''
 
       const fechaSelector = (
         <div
           key={formattedDate}
           className='col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 text-center mb-3 border rounded bg-light py-2 px-1'
         >
-          <div>
-            {daysOfWeek[i]} {formattedDate}
-          </div>
+          <div>{formattedDate}</div>
           {selectedUsuario && (
             <>
               <div>
@@ -210,30 +229,68 @@ function MaestroRutas() {
               {almacenesActivos.some(
                 (almacen) => almacen.nombre === almacen1Value
               ) && (
-                <div>
-                  <input
-                    className={`form-control ${
-                      almacenesValidos[`${formattedDate}_almacen2`] === true
-                        ? 'is-valid'
-                        : almacenesValidos[`${formattedDate}_almacen2`] ===
-                          false
-                        ? 'is-invalid'
-                        : ''
-                    }`}
-                    list={`opcionesAlmacen-${formattedDate}-2`}
-                    id={`almacen-${formattedDate}-2`}
-                    placeholder='...'
-                    value={almacen2Value}
-                    onChange={(e) => handleAlmacenChange(e, formattedDate, 2)}
-                  />
-                  <datalist id={`opcionesAlmacen-${formattedDate}-2`}>
-                    {almacenesActivos
-                      .filter((almacen) => almacen.nombre !== almacen1Value)
-                      .map((almacen) => (
-                        <option key={almacen.id} value={almacen.nombre} />
-                      ))}
-                  </datalist>
-                </div>
+                <>
+                  <div>
+                    <input
+                      className={`form-control my-2 ${
+                        almacenesValidos[`${formattedDate}_almacen2`] === true
+                          ? 'is-valid'
+                          : almacenesValidos[`${formattedDate}_almacen2`] ===
+                            false
+                          ? 'is-invalid'
+                          : ''
+                      }`}
+                      list={`opcionesAlmacen-${formattedDate}-2`}
+                      id={`almacen-${formattedDate}-2`}
+                      placeholder='...'
+                      value={almacen2Value}
+                      onChange={(e) => handleAlmacenChange(e, formattedDate, 2)}
+                    />
+                    <datalist id={`opcionesAlmacen-${formattedDate}-2`}>
+                      {almacenesActivos
+                        .filter((almacen) => almacen.nombre !== almacen1Value)
+                        .map((almacen) => (
+                          <option key={almacen.id} value={almacen.nombre} />
+                        ))}
+                    </datalist>
+                  </div>
+
+                  {almacenesActivos.some(
+                    (almacen) => almacen.nombre === almacen2Value
+                  ) && (
+                    <div>
+                      <input
+                        className={`form-control my-2 ${
+                          almacenesValidos[`${formattedDate}_almacen3`] === true
+                            ? 'is-valid'
+                            : almacenesValidos[`${formattedDate}_almacen3`] ===
+                              false
+                            ? 'is-invalid'
+                            : ''
+                        }`}
+                        list={`opcionesAlmacen-${formattedDate}-3`}
+                        id={`almacen-${formattedDate}-3`}
+                        placeholder='...'
+                        value={almacen3Value}
+                        onChange={(e) =>
+                          handleAlmacenChange(e, formattedDate, 3)
+                        }
+                      />
+                      <datalist id={`opcionesAlmacen-${formattedDate}-3`}>
+                        {almacenesActivos
+                          .filter(
+                            (almacen) =>
+                              ![almacen1Value, almacen2Value].includes(
+                                almacen.nombre
+                              )
+                          )
+                          .map((almacen) => (
+                            <option key={almacen.id} value={almacen.nombre} />
+                          ))}
+                      </datalist>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
@@ -241,6 +298,8 @@ function MaestroRutas() {
       )
 
       fechaSelectors.push(fechaSelector)
+
+      currentDate = addDays(currentDate, 1)
     }
 
     return fechaSelectors
@@ -253,6 +312,17 @@ function MaestroRutas() {
       <section className='rounded border p-2 mb-3'>
         <h4 className='text-center'>Asignar una nueva ruta</h4>
         <form onSubmit={handleSubmit} className='needs-validation' noValidate>
+          <div className='text-center'>
+            <DatePicker
+              selected={startDate}
+              onChange={handleDateChange}
+              startDate={startDate}
+              endDate={endDate}
+              selectsRange
+              inline
+              className='text-center'
+            />
+          </div>
           <div className='input-group mb-3'>
             <label htmlFor='listaUsuarios' className='input-group-text'>
               <i className='fas fa-id-card-clip me-1'></i> Promotora:
@@ -304,15 +374,6 @@ function MaestroRutas() {
             </div>
           )}
         </form>
-      </section>
-
-      <section className='rounded border p-1'>
-        <h4 className='text-center'>Consultar Rutas Finalizadas</h4>
-        <AcordionRutas
-          rutas={rutasInactivas}
-          usuarios={usuarios}
-          almacenes={almacenesActivos}
-        />
       </section>
     </div>
   )

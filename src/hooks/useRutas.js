@@ -1,5 +1,3 @@
-import { useEffect } from 'react'
-
 import { doc, updateDoc, serverTimestamp, GeoPoint } from 'firebase/firestore'
 import { db } from '../firebaseApp'
 import { toast } from 'react-toastify'
@@ -12,44 +10,6 @@ function useRutas(activo = null) {
     editarDocumento,
     agregarDocumento,
   } = useFirestore('rutas', activo)
-
-  useEffect(() => {
-    desactivarRutasVencidas()
-    // eslint-disable-next-line
-  }, [rutas])
-
-  const desactivarRutasVencidas = async () => {
-    try {
-      // Verificar si la fecha actual es mayor a todas las fechas programadas para desactivar la ruta
-      const fechaActual = new Date()
-      fechaActual.setHours(0, 0, 0, 0)
-
-      for (const ruta of rutas) {
-        if (ruta.activo) {
-          const locaciones = ruta.locaciones
-          // Se obtienen las fechas programadas en la ruta y se ordenan de mas antigua a mas reciente
-          const fechasProgramadas = Object.keys(locaciones).sort((a, b) => {
-            const dateA = new Date(a.split('-').reverse().join('-'))
-            const dateB = new Date(b.split('-').reverse().join('-'))
-            return dateA - dateB
-          })
-          // Se obtiene el ultimo dia programado y se crea un objeto Date() a partir del día
-          const ultimoDiaProgramado =
-            fechasProgramadas[fechasProgramadas.length - 1]
-          const [dia, mes, anio] = ultimoDiaProgramado.split('-')
-          const fechaUltimaProgramada = new Date(anio, mes - 1, dia)
-
-          // Si la fecha actual es mayor a la última fecha programada, se desactiva la ruta
-          if (fechaActual > fechaUltimaProgramada) {
-            await editarDocumento(ruta.id, { ...ruta, activo: false })
-          }
-        }
-      }
-    } catch (error) {
-      toast.error('Error al desactivar rutas vencidas')
-      console.error(error)
-    }
-  }
 
   const marcarLlegada = async (ruta, fecha, nombreAlmacen, novedad) => {
     try {

@@ -5,6 +5,8 @@ import {
   onSnapshot,
   addDoc,
   getDocs,
+  getDoc,
+  setDoc,
   updateDoc,
   doc,
   deleteDoc,
@@ -47,15 +49,45 @@ const useFirestore = (collectionName, activo = null) => {
   }
 
   // Función para agregar un nuevo documento a una colección
-  const agregarDocumento = async (document) => {
+  const agregarDocumento = async (data, documentId = null) => {
     setCargando(true)
     try {
-      const docRef = await addDoc(collection(db, collectionName), document)
-      setDatos((prevData) => [...prevData, { id: docRef.id, ...document }])
+      let documentRef
+
+      // Verificar si se proporcionó un documentId
+      if (documentId) {
+        // Si se proporciona un documentId, verificar si ya existe un documento con ese ID
+        const docSnap = await getDoc(doc(db, collectionName, documentId))
+        if (docSnap.exists()) {
+          throw new Error(
+            `El documento '${documentId}' ya existe en '${collectionName}'`
+          )
+        }
+        // Si no existe, usar el documentId proporcionado
+        documentRef = doc(db, collectionName, documentId)
+      } else {
+        // Si no se proporciona un documentId, Firestore generará uno automáticamente
+        documentRef = await addDoc(collection(db, collectionName), data)
+      }
+
+      // Guardar los datos en Firestore
+      await setDoc(documentRef, data)
+
+      // Construir el objeto de documento con el ID y los datos proporcionados
+      const document = {
+        id: documentRef.id,
+        ...data,
+      }
+
+      // Actualizar el estado de datos con el nuevo documento
+      setDatos((prevData) => [...prevData, document])
     } catch (error) {
-      toast.error(`Error al agregar el documento en '${collectionName}'`)
-      console.error('Error al agregar el documento:', error)
+      // Manejar errores mostrando un mensaje de error
+      toast.error(error.message || 'Error al agregar el documento')
+      console.error('Error al agregar el documento:\n', error)
+      throw error
     } finally {
+      // Establecer el estado de carga en falso después de completar la operación
       setCargando(false)
     }
   }
@@ -135,11 +167,13 @@ const useFirestore = (collectionName, activo = null) => {
         }
       }
     )
+    console.log(collectionName)
 
     // Cancelar la suscripción cuando el componente se desmonte
     return () => {
       unsubscribe()
     }
+
     // eslint-disable-next-line
   }, [collectionName, activo])
 
