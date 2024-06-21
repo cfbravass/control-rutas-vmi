@@ -77,8 +77,7 @@ function Login() {
     <div className='d-flex align-items-center justify-content-center vh-100'>
       <div className='mx-4 p-5 rounded border bg-light text-center'>
         <img src={logoAzul} alt='Logo Vanessa' height='69' className='mb-3' />
-        <h1>Control Rutas VMI</h1>
-        <h4 className='mb-4'>Acceder a tu cuenta</h4>
+        <h1 className='mb-4'>Control Rutas VMI</h1>
         <form>
           <div className='input-group mb-3'>
             <span className='input-group-text'>

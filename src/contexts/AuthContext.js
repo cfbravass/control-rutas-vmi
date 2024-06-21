@@ -108,7 +108,7 @@ export default function AuthContextProvider({ children }) {
     return null
   }
 
-  async function register(nombre, email, password) {
+  async function register(nombre, email, password, uidCoordinadora) {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email,
@@ -120,6 +120,7 @@ export default function AuthContextProvider({ children }) {
       nombre,
       uid: user.uid,
       email,
+      uidCoordinadora,
       roles: ['usuario'],
       activo: true,
     })

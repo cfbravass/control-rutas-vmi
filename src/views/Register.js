@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useState } from 'react'
 
 import { useAuth } from '../contexts/AuthContext'
+import { useUsuarios } from '../contexts/UsuariosContext'
 
 import logoAzul from '../static/assets/img/logo-vanessa-azul.png'
 
@@ -11,10 +12,15 @@ function Register() {
   const navigate = useNavigate()
   const location = useLocation()
   const { register } = useAuth()
+  const { datos: usuarios } = useUsuarios()
+  const usuariosAdmin = usuarios.filter((usuario) =>
+    usuario.roles.includes('admin')
+  )
 
   const [email, setEmail] = useState('')
   const [nombre, setNombre] = useState('')
   const [password, setPassword] = useState('')
+  const [uidCoordinadora, setUidCoordinadora] = useState('')
   const [showPassword, setShowPassword] = useState(false)
 
   const handleShowPass = () => {
@@ -34,12 +40,17 @@ function Register() {
   const handleRegister = async (e) => {
     e.preventDefault()
 
+    if (!nombre || !email || !password || !uidCoordinadora) {
+      toast.error('Todos los campos son obligatorios')
+      return
+    }
+
     const id = toast.loading('Creando cuenta...', {
       position: toast.POSITION.BOTTOM_CENTER,
     })
 
     try {
-      const user = await register(nombre, email, password)
+      const user = await register(nombre, email, password, uidCoordinadora)
 
       if (user) {
         toast.update(id, {
@@ -67,13 +78,12 @@ function Register() {
     <div className='d-flex align-items-center justify-content-center vh-100'>
       <div className='mx-4 p-5 rounded border bg-light text-center'>
         <img src={logoAzul} alt='Logo Vanessa' height='69' className='mb-3' />
-        <h1>Control Rutas VMI</h1>
-        <h4 className='mb-4'>Crear una nueva cuenta</h4>
+        <h2 className='mb-5'>Crear una nueva cuenta</h2>
         <form>
-          <div className='input-group mb-3'>
-            <span className='input-group-text'>
-              <i className='fas fa-user'></i>
-            </span>
+          <div className='input-group mb-1'>
+            <label className='input-group-text' htmlFor='nombre'>
+              <i className='fas fa-user me-1'></i>
+            </label>
             <div className='form-floating'>
               <input
                 type='text'
@@ -89,10 +99,10 @@ function Register() {
               </label>
             </div>
           </div>
-          <div className='input-group mb-3'>
-            <span className='input-group-text'>
-              <i className='fas fa-envelope'></i>
-            </span>
+          <div className='input-group mb-1'>
+            <label className='input-group-text' htmlFor='email'>
+              <i className='fas fa-envelope me-1'></i>
+            </label>
             <div className='form-floating'>
               <input
                 autoComplete='email'
@@ -109,10 +119,10 @@ function Register() {
               </label>
             </div>
           </div>
-          <div className='input-group mb-3'>
-            <span className='input-group-text'>
-              <i className='fas fa-key'></i>
-            </span>
+          <div className='input-group mb-1'>
+            <label className='input-group-text' htmlFor='password'>
+              <i className='fas fa-key me-1'></i>
+            </label>
             <div className='form-floating'>
               <input
                 autoComplete='current-password'
@@ -134,7 +144,6 @@ function Register() {
               title={showPassword ? 'Ocultar' : 'Mostrar'}
               onClick={handleShowPass}
             >
-              {/* span adicional con estilos para alinear ambos iconos */}
               <span
                 style={{
                   width: '1em',
@@ -146,6 +155,33 @@ function Register() {
                 ></i>
               </span>
             </span>
+          </div>
+
+          <div className='input-group mb-1'>
+            <label class='input-group-text' htmlFor='uidCoordinadora'>
+              <i className='fas fa-user-gear'></i>
+            </label>
+            <div className='form-floating'>
+              <select
+                className='form-select'
+                id='uidCoordinadora'
+                required
+                value={uidCoordinadora}
+                onChange={(e) => setUidCoordinadora(e.target.value)}
+              >
+                <option value='' disabled>
+                  Seleccionar...
+                </option>
+                {usuariosAdmin.map((usuario) => (
+                  <option key={usuario.uid} value={usuario.uid}>
+                    {usuario.nombre}
+                  </option>
+                ))}
+              </select>
+              <label htmlFor='uidCoordinadora'>
+                <sup className='text-danger'>*</sup>Coordinadora
+              </label>
+            </div>
           </div>
 
           <button
