@@ -158,7 +158,7 @@ function Register() {
           </div>
 
           <div className='input-group mb-1'>
-            <label class='input-group-text' htmlFor='uidCoordinadora'>
+            <label className='input-group-text' htmlFor='uidCoordinadora'>
               <i className='fas fa-user-gear'></i>
             </label>
             <div className='form-floating'>

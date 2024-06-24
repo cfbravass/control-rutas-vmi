@@ -80,8 +80,9 @@ export default function MaestroUsuarios() {
                       placeholder='Buscar...'
                       value={buscarNombre}
                       onChange={handleBuscarNombre}
+                      id='filtrar_nombre_usuario'
                     />
-                    <label htmlFor='nombre'>NOMBRE</label>
+                    <label htmlFor='filtrar_nombre_usuario'>NOMBRE</label>
                   </div>
                 </th>
                 <th scope='col' className='align-middle'>

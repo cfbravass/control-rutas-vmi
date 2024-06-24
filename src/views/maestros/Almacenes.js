@@ -89,7 +89,7 @@ export default function MaestroAlmacenes() {
                       aria-label='Buscar...'
                       onChange={handleBuscarCiudad}
                       value={buscarCiudad || 'TODAS'}
-                      id='ciudad'
+                      id='filtrar_ciudad'
                     >
                       <option value='TODAS'>TODAS</option>
                       {ciudades.map((ciudad) => (
@@ -98,7 +98,7 @@ export default function MaestroAlmacenes() {
                         </option>
                       ))}
                     </select>
-                    <label htmlFor='ciudad'>CIUDAD</label>
+                    <label htmlFor='filtrar_ciudad'>CIUDAD</label>
                   </div>
                 </th>
                 <th scope='col'>
@@ -109,8 +109,9 @@ export default function MaestroAlmacenes() {
                       placeholder='Buscar...'
                       value={buscarNombre}
                       onChange={handleBuscarNombre}
+                      id='filtrar_nombre'
                     />
-                    <label htmlFor='nombre'>NOMBRE</label>
+                    <label htmlFor='filtrar_nombre'>NOMBRE</label>
                   </div>
                 </th>
                 <th scope='col' className='align-middle'>
