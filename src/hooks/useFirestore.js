@@ -73,14 +73,14 @@ const useFirestore = (collectionName, activo = null) => {
       // Guardar los datos en Firestore
       await setDoc(documentRef, data)
 
-      // Construir el objeto de documento con el ID y los datos proporcionados
+      /* // Construir el objeto de documento con el ID y los datos proporcionados
       const document = {
         id: documentRef.id,
         ...data,
       }
 
       // Actualizar el estado de datos con el nuevo documento
-      setDatos((prevData) => [...prevData, document])
+      setDatos((prevData) => [...prevData, document]) */
     } catch (error) {
       // Manejar errores mostrando un mensaje de error
       toast.error(error.message || 'Error al agregar el documento')
@@ -98,11 +98,11 @@ const useFirestore = (collectionName, activo = null) => {
     try {
       const documentRef = doc(db, collectionName, documentId)
       await updateDoc(documentRef, updatedData)
-      setDatos((prevData) =>
+      /* setDatos((prevData) =>
         prevData.map((doc) =>
           doc.id === documentId ? { id: doc.id, ...doc, ...updatedData } : doc
         )
-      )
+      ) */
     } catch (error) {
       toast.error(
         `Error al actualizar el documento '${collectionName}/${documentId}'`
