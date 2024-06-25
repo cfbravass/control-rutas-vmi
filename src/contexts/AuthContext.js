@@ -92,8 +92,13 @@ export default function AuthContextProvider({ children }) {
     // eslint-disable-next-line
   }, [])
 
-  function login(email, password) {
-    return signInWithEmailAndPassword(auth, email, password)
+  const login = async (email, password) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password)
+    } catch (error) {
+      console.error('Error al iniciar sesión:', error)
+      throw error
+    }
   }
 
   async function getUserData(uid) {

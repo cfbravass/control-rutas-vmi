@@ -14,10 +14,12 @@ import {
 } from 'firebase/firestore'
 import { db } from '../firebaseApp'
 import { toast } from 'react-toastify'
+import { useAuth } from '../contexts/AuthContext'
 
 const useFirestore = (collectionName, activo = null) => {
   const [datos, setDatos] = useState([])
   const [cargando, setCargando] = useState(true)
+  const { isAuthenticated } = useAuth()
 
   // Función para obtener los documentos de una colección
   const obtenerDocumentos = async () => {
@@ -132,6 +134,11 @@ const useFirestore = (collectionName, activo = null) => {
 
   // Suscripcion para actualizar datos en tiempo real
   useEffect(() => {
+    // Validar que el usuario esté autenticado o que la colección sea publica
+    if (!isAuthenticated() && collectionName !== 'usuarios') {
+      return
+    }
+
     const unsubscribe = onSnapshot(
       collection(db, collectionName),
       (querySnapshot) => {
@@ -165,6 +172,9 @@ const useFirestore = (collectionName, activo = null) => {
         } finally {
           setCargando(false)
         }
+      },
+      (error) => {
+        console.error('Error en onSnapshot:', error) // Log adicional para errores de onSnapshot
       }
     )
 
