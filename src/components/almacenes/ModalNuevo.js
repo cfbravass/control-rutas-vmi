@@ -1,9 +1,15 @@
 import { toast } from 'react-toastify'
 import { useEffect, useState } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
+import { useUsuarios } from '../../contexts/UsuariosContext'
 
 export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
   const [nombresAlmacenes, setNombresAlmacenes] = useState([])
   const [nombreExistente, setNombreExistente] = useState(false)
+  const { datos: usuarios } = useUsuarios()
+  const [usuariosAdmin, setUsuariosAdmin] = useState([])
+  const [uidCoordinadora, setUidCoordinadora] = useState('')
+  const { currentUser } = useAuth()
 
   const [form, setForm] = useState({
     nombre: '',
@@ -23,6 +29,8 @@ export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
       toast.warning('Debe ingresar la ciudad del almacén')
       return null
     }
+
+    setForm({ ...form, uidCoordinadora })
 
     toast.promise(crearAlmacen(form), {
       pending: 'Creando almacén...',
@@ -52,12 +60,24 @@ export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
       longitud: 0,
     })
     setNombreExistente(false)
+    setUidCoordinadora(currentUser.uid)
   }
 
   useEffect(() => {
     setNombresAlmacenes(almacenes.map((almacen) => almacen.nombre))
     return resetForm
+
+    // eslint-disable-next-line
   }, [almacenes])
+
+  useEffect(() => {
+    setUsuariosAdmin(
+      usuarios.filter((usuario) => usuario.roles.includes('admin'))
+    )
+
+    setUidCoordinadora(currentUser.uid)
+    // eslint-disable-next-line
+  }, [usuarios])
 
   return (
     <>
@@ -96,7 +116,7 @@ export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
               noValidate
             >
               <div className='modal-body'>
-                <div className='form-floating mb-3'>
+                <div className='form-floating mb-2'>
                   <input
                     type='text'
                     className={`form-control ${
@@ -122,7 +142,7 @@ export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
                   )}
                 </div>
 
-                <div className='form-floating mb-3'>
+                <div className='form-floating mb-2'>
                   <input
                     type='text'
                     className='form-control'
@@ -139,7 +159,7 @@ export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
                   </label>
                 </div>
 
-                <div className='form-floating mb-3'>
+                <div className='form-floating mb-2'>
                   <input
                     type='text'
                     className='form-control'
@@ -154,7 +174,34 @@ export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
                   </label>
                 </div>
 
-                <div className='input-group mb-3'>
+                <div className='input-group mb-2'>
+                  <label className='input-group-text' htmlFor='uidCoordinadora'>
+                    <i className='fas fa-user-gear'></i>
+                  </label>
+                  <div className='form-floating'>
+                    <select
+                      className='form-select'
+                      id='uidCoordinadora'
+                      required
+                      value={uidCoordinadora}
+                      onChange={(e) => setUidCoordinadora(e.target.value)}
+                    >
+                      <option value='' disabled>
+                        Seleccionar...
+                      </option>
+                      {usuariosAdmin.map((usuario) => (
+                        <option key={usuario.uid} value={usuario.uid}>
+                          {usuario.nombre}
+                        </option>
+                      ))}
+                    </select>
+                    <label htmlFor='uidCoordinadora'>
+                      Coordinadora<sup className='text-danger'>*</sup>
+                    </label>
+                  </div>
+                </div>
+
+                <div className='input-group'>
                   <div className='form-floating'>
                     <input
                       type='number'
@@ -194,6 +241,7 @@ export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
                   type='submit'
                   className='btn btn-success'
                   disabled={nombreExistente}
+                  data-bs-dismiss='modal'
                 >
                   Guardar
                 </button>

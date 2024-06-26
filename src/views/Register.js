@@ -1,6 +1,6 @@
 import { toast } from 'react-toastify'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useAuth } from '../contexts/AuthContext'
 import { useUsuarios } from '../contexts/UsuariosContext'
@@ -13,9 +13,7 @@ function Register() {
   const location = useLocation()
   const { register } = useAuth()
   const { datos: usuarios } = useUsuarios()
-  const usuariosAdmin = usuarios.filter((usuario) =>
-    usuario.roles.includes('admin')
-  )
+  const [usuariosAdmin, setUsuariosAdmin] = useState([])
 
   const [email, setEmail] = useState('')
   const [nombre, setNombre] = useState('')
@@ -73,6 +71,12 @@ function Register() {
       })
     }
   }
+
+  useEffect(() => {
+    setUsuariosAdmin(
+      usuarios.filter((usuario) => usuario.roles.includes('admin'))
+    )
+  }, [usuarios])
 
   return (
     <div className='d-flex align-items-center justify-content-center vh-100'>

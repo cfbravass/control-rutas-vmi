@@ -164,7 +164,7 @@ export default function MaestroAlmacenes() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className='text-center text-danger px-5'>
+                  <td colSpan={7} className='text-center text-danger px-5'>
                     <p className='fa-bounce'>No se han encontrado resultados</p>
                   </td>
                 </tr>

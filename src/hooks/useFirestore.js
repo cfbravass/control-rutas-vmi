@@ -134,11 +134,6 @@ const useFirestore = (collectionName, activo = null) => {
 
   // Suscripcion para actualizar datos en tiempo real
   useEffect(() => {
-    // Validar que el usuario esté autenticado o que la colección sea publica
-    if (!isAuthenticated() && collectionName !== 'usuarios') {
-      return
-    }
-
     const unsubscribe = onSnapshot(
       collection(db, collectionName),
       (querySnapshot) => {
