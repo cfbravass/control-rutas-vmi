@@ -4,6 +4,7 @@ import ModalNuevoAlmacen from '../../components/almacenes/ModalNuevo'
 import Cargando from '../../components/Cargando'
 import ModalEditarAlmacen from '../../components/almacenes/ModalEditar'
 import { useAlmacenes } from '../../contexts/AlmacenesContext'
+import { useUsuarios } from '../../contexts/UsuariosContext'
 
 export default function MaestroAlmacenes() {
   const {
@@ -12,10 +13,12 @@ export default function MaestroAlmacenes() {
     crearAlmacen,
     modificarAlmacen,
   } = useAlmacenes()
+  const { datos: usuarios } = useUsuarios()
   const [ciudades, setCiudades] = useState([])
   const [buscarNombre, setBuscarNombre] = useState('')
   const [buscarCiudad, setBuscarCiudad] = useState('')
   const [almacenesFiltrados, setAlmacenesFiltrados] = useState([])
+  const [usuariosAdmin, setUsuariosAdmin] = useState([])
 
   useEffect(() => {
     // Creamos una lista de ciudades con todos los almacenes
@@ -25,6 +28,13 @@ export default function MaestroAlmacenes() {
     // Al inicio, mostramos todos los almacenes sin filtrar (ordenados por activo y luego inactivo)
     setAlmacenesFiltrados(almacenes.sort((a, b) => b.activo - a.activo))
   }, [almacenes])
+
+  useEffect(() => {
+    setUsuariosAdmin(
+      usuarios.filter((usuario) => usuario.roles.includes('admin'))
+    )
+    // eslint-disable-next-line
+  }, [usuarios])
 
   const handleBuscarNombre = (e) => {
     const { value } = e.target
@@ -66,14 +76,18 @@ export default function MaestroAlmacenes() {
       <section className='mx-5'>
         <h1 className='text-center mb-4'>Maestro de Almacenes</h1>
 
-        <ModalNuevoAlmacen almacenes={almacenes} crearAlmacen={crearAlmacen} />
+        <ModalNuevoAlmacen
+          almacenes={almacenes}
+          crearAlmacen={crearAlmacen}
+          usuariosAdmin={usuariosAdmin}
+        />
         <div className='table-responsive'>
-          <table className='table table-hover table-bordered caption-top'>
+          <table className='table table-hover table-bordered table-striped caption-top'>
             <caption>
               Listado de almacenes [{almacenesFiltrados.length}/
               {almacenes.length}]
             </caption>
-            <thead>
+            <thead className='table-primary'>
               <tr>
                 <th
                   scope='col'
@@ -118,6 +132,9 @@ export default function MaestroAlmacenes() {
                   DIRECCIÓN
                 </th>
                 <th scope='col' className='align-middle'>
+                  NOTA
+                </th>
+                <th scope='col' className='align-middle'>
                   LATITUD
                 </th>
                 <th scope='col' className='align-middle'>
@@ -131,14 +148,14 @@ export default function MaestroAlmacenes() {
             <tbody className='table-group-divider'>
               {cargando ? (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={7}>
                     <Cargando />
                   </td>
                 </tr>
               ) : almacenesFiltrados.length !== 0 ? (
                 almacenesFiltrados.map((almacen) => (
                   <tr key={almacen.id}>
-                    <th scope='row' className='text-center'>
+                    <th scope='row' className='text-center align-middle'>
                       <i
                         className={`fas fa-circle-${
                           almacen.activo
@@ -147,17 +164,28 @@ export default function MaestroAlmacenes() {
                         }`}
                       ></i>
                     </th>
-                    <td>{almacen.ciudad}</td>
-                    <td>{almacen.nombre}</td>
-                    <td>{almacen.direccion}</td>
-                    <td>{almacen.ubicacion.latitude}</td>
-                    <td>{almacen.ubicacion.longitude}</td>
-                    <td className='text-center'>
+                    <td className='align-middle'>{almacen.ciudad}</td>
+                    <td className='align-middle'>{almacen.nombre}</td>
+                    <td className='align-middle'>{almacen.direccion}</td>
+                    <td
+                      className='align-middle'
+                      dangerouslySetInnerHTML={{
+                        __html: almacen.nota?.replace(/\\n/g, '<br>'),
+                      }}
+                    ></td>
+                    <td className='align-middle'>
+                      {almacen.ubicacion.latitude}
+                    </td>
+                    <td className='align-middle'>
+                      {almacen.ubicacion.longitude}
+                    </td>
+                    <td className='text-center align-middle'>
                       <ModalEditarAlmacen
                         idModal={`modalEditarAlmacen${almacen.id}`}
                         almacen={almacen}
                         almacenes={almacenes}
                         modificarAlmacen={modificarAlmacen}
+                        usuariosAdmin={usuariosAdmin}
                       />
                     </td>
                   </tr>

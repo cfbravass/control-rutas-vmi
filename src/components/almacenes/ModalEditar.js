@@ -6,6 +6,7 @@ export default function ModalEditarAlmacen({
   almacen,
   almacenes,
   modificarAlmacen,
+  usuariosAdmin,
 }) {
   const [nombreExistente, setNombreExistente] = useState(false)
   const [form, setForm] = useState({
@@ -14,7 +15,9 @@ export default function ModalEditarAlmacen({
     direccion: almacen.direccion || '',
     latitud: almacen.ubicacion.latitude || 0,
     longitud: almacen.ubicacion.longitude || 0,
+    nota: almacen.nota.replace(/\\n/g, '\n') || '',
   })
+  const [uidCoordinadora, setUidCoordinadora] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -27,7 +30,7 @@ export default function ModalEditarAlmacen({
       return null
     }
 
-    toast.promise(modificarAlmacen(almacen.id, form), {
+    toast.promise(modificarAlmacen(almacen.id, { ...form, uidCoordinadora }), {
       pending: 'Actualizando almacén...',
       error: 'No se pudo modificar el almacén',
       success: 'Almacén actualizado con éxito',
@@ -59,6 +62,8 @@ export default function ModalEditarAlmacen({
       direccion: '',
       latitud: 0,
       longitud: 0,
+      nota: '',
+      uidCoordinadora: '',
     })
     setNombreExistente(false)
 
@@ -76,6 +81,8 @@ export default function ModalEditarAlmacen({
   }
 
   useEffect(() => {
+    setUidCoordinadora(almacen.uidCoordinadora)
+
     return resetForm
     // eslint-disable-next-line
   }, [])
@@ -133,7 +140,7 @@ export default function ModalEditarAlmacen({
                     required
                   />
                   <label htmlFor='nombre'>
-                    <i className='fas fa-shop' /> NOMBRE
+                    <i className='fas fa-shop' /> NOMBRE PUNTO DE VENTA
                     <sup className='text-danger'>*</sup>
                   </label>
                   {nombreExistente && (
@@ -143,34 +150,36 @@ export default function ModalEditarAlmacen({
                   )}
                 </div>
 
-                <div className='form-floating mb-3'>
-                  <input
-                    type='text'
-                    className='form-control'
-                    placeholder='ciudad'
-                    name='ciudad'
-                    onChange={handleChange}
-                    value={form['ciudad']}
-                    required
-                  />
-                  <label htmlFor='ciudad'>
-                    <i className='fas fa-tree-city' /> CIUDAD
-                    <sup className='text-danger'>*</sup>
-                  </label>
-                </div>
+                <div className='input-group mb-2'>
+                  <div className='form-floating'>
+                    <input
+                      type='text'
+                      className='form-control'
+                      placeholder='ciudad'
+                      name='ciudad'
+                      onChange={handleChange}
+                      value={form['ciudad']}
+                      required
+                    />
+                    <label htmlFor='ciudad'>
+                      <i className='fas fa-tree-city' /> CIUDAD
+                      <sup className='text-danger'>*</sup>
+                    </label>
+                  </div>
 
-                <div className='form-floating mb-3'>
-                  <input
-                    type='text'
-                    className='form-control'
-                    placeholder='direccion'
-                    name='direccion'
-                    onChange={handleChange}
-                    value={form['direccion']}
-                  />
-                  <label htmlFor='direccion'>
-                    <i className='fas fa-location-dot' /> DIRECCIÓN
-                  </label>
+                  <div className='form-floating '>
+                    <input
+                      type='text'
+                      className='form-control'
+                      placeholder='direccion'
+                      name='direccion'
+                      onChange={handleChange}
+                      value={form['direccion']}
+                    />
+                    <label htmlFor='direccion'>
+                      <i className='fas fa-location-dot' /> DIRECCIÓN
+                    </label>
+                  </div>
                 </div>
 
                 <div className='input-group mb-3'>
@@ -204,6 +213,52 @@ export default function ModalEditarAlmacen({
                       <i className='fas fa-map-location-dot' /> LONGITUD
                     </label>
                   </div>
+                </div>
+
+                <div className='input-group mb-2'>
+                  <label
+                    className='input-group-text'
+                    htmlFor='editUidCoordinadora'
+                  >
+                    <i className='fas fa-user-gear'></i>
+                  </label>
+                  <div className='form-floating'>
+                    <select
+                      className='form-select'
+                      id='editUidCoordinadora'
+                      required
+                      value={uidCoordinadora}
+                      onChange={(e) => setUidCoordinadora(e.target.value)}
+                    >
+                      <option value='' disabled>
+                        Seleccionar...
+                      </option>
+                      {usuariosAdmin.map((usuario) => (
+                        <option key={usuario.uid} value={usuario.uid}>
+                          {usuario.nombre}
+                        </option>
+                      ))}
+                    </select>
+                    <label htmlFor='editUidCoordinadora'>
+                      Coordinadora<sup className='text-danger'>*</sup>
+                    </label>
+                  </div>
+                </div>
+
+                <div className='form-floating'>
+                  <textarea
+                    className='form-control form-control-sm'
+                    placeholder='Deja tus observaciones aquí...'
+                    id='nota'
+                    style={{ height: '100px' }}
+                    name='nota'
+                    onChange={handleChange}
+                    value={form['nota']}
+                  ></textarea>
+                  <label htmlFor='nota'>
+                    <i className='fas fa-comments me-1' />
+                    NOTA
+                  </label>
                 </div>
               </div>
               <div className='modal-footer'>

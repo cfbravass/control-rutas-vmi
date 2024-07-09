@@ -1,13 +1,14 @@
 import { toast } from 'react-toastify'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { useUsuarios } from '../../contexts/UsuariosContext'
 
-export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
+export default function ModalNuevoAlmacen({
+  almacenes,
+  crearAlmacen,
+  usuariosAdmin,
+}) {
   const [nombresAlmacenes, setNombresAlmacenes] = useState([])
   const [nombreExistente, setNombreExistente] = useState(false)
-  const { datos: usuarios } = useUsuarios()
-  const [usuariosAdmin, setUsuariosAdmin] = useState([])
   const [uidCoordinadora, setUidCoordinadora] = useState('')
   const { currentUser } = useAuth()
 
@@ -17,6 +18,7 @@ export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
     direccion: '',
     latitud: 0,
     longitud: 0,
+    nota: '',
   })
 
   const handleSubmit = async (e) => {
@@ -30,9 +32,7 @@ export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
       return null
     }
 
-    setForm({ ...form, uidCoordinadora })
-
-    toast.promise(crearAlmacen(form), {
+    toast.promise(crearAlmacen({ ...form, uidCoordinadora }), {
       pending: 'Creando almacén...',
       error: 'No se pudo crear el almacén',
       success: 'Almacén creado con éxito',
@@ -58,6 +58,7 @@ export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
       direccion: '',
       latitud: 0,
       longitud: 0,
+      nota: '',
     })
     setNombreExistente(false)
     setUidCoordinadora(currentUser.uid)
@@ -69,15 +70,6 @@ export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
 
     // eslint-disable-next-line
   }, [almacenes])
-
-  useEffect(() => {
-    setUsuariosAdmin(
-      usuarios.filter((usuario) => usuario.roles.includes('admin'))
-    )
-
-    setUidCoordinadora(currentUser.uid)
-    // eslint-disable-next-line
-  }, [usuarios])
 
   return (
     <>
@@ -132,7 +124,7 @@ export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
                     required
                   />
                   <label htmlFor='nombre'>
-                    <i className='fas fa-shop' /> NOMBRE
+                    <i className='fas fa-shop' /> NOMBRE PUNTO DE VENTA
                     <sup className='text-danger'>*</sup>
                   </label>
                   {nombreExistente && (
@@ -142,66 +134,41 @@ export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
                   )}
                 </div>
 
-                <div className='form-floating mb-2'>
-                  <input
-                    type='text'
-                    className='form-control'
-                    id='ciudad'
-                    placeholder='ciudad'
-                    name='ciudad'
-                    onChange={handleChange}
-                    value={form['ciudad']}
-                    required
-                  />
-                  <label htmlFor='ciudad'>
-                    <i className='fas fa-tree-city' /> CIUDAD
-                    <sup className='text-danger'>*</sup>
-                  </label>
-                </div>
-
-                <div className='form-floating mb-2'>
-                  <input
-                    type='text'
-                    className='form-control'
-                    id='direccion'
-                    placeholder='direccion'
-                    name='direccion'
-                    onChange={handleChange}
-                    value={form['direccion']}
-                  />
-                  <label htmlFor='direccion'>
-                    <i className='fas fa-location-dot' /> DIRECCIÓN
-                  </label>
-                </div>
-
                 <div className='input-group mb-2'>
-                  <label className='input-group-text' htmlFor='uidCoordinadora'>
-                    <i className='fas fa-user-gear'></i>
-                  </label>
                   <div className='form-floating'>
-                    <select
-                      className='form-select'
-                      id='uidCoordinadora'
+                    <input
+                      type='text'
+                      className='form-control'
+                      id='ciudad'
+                      placeholder='ciudad'
+                      name='ciudad'
+                      onChange={handleChange}
+                      value={form['ciudad']}
                       required
-                      value={uidCoordinadora}
-                      onChange={(e) => setUidCoordinadora(e.target.value)}
-                    >
-                      <option value='' disabled>
-                        Seleccionar...
-                      </option>
-                      {usuariosAdmin.map((usuario) => (
-                        <option key={usuario.uid} value={usuario.uid}>
-                          {usuario.nombre}
-                        </option>
-                      ))}
-                    </select>
-                    <label htmlFor='uidCoordinadora'>
-                      Coordinadora<sup className='text-danger'>*</sup>
+                    />
+                    <label htmlFor='ciudad'>
+                      <i className='fas fa-tree-city' /> CIUDAD
+                      <sup className='text-danger'>*</sup>
+                    </label>
+                  </div>
+
+                  <div className='form-floating'>
+                    <input
+                      type='text'
+                      className='form-control'
+                      id='direccion'
+                      placeholder='direccion'
+                      name='direccion'
+                      onChange={handleChange}
+                      value={form['direccion']}
+                    />
+                    <label htmlFor='direccion'>
+                      <i className='fas fa-location-dot' /> DIRECCIÓN
                     </label>
                   </div>
                 </div>
 
-                <div className='input-group'>
+                <div className='input-group mb-2'>
                   <div className='form-floating'>
                     <input
                       type='number'
@@ -234,6 +201,49 @@ export default function ModalNuevoAlmacen({ almacenes, crearAlmacen }) {
                       <i className='fas fa-map-location-dot' /> LONGITUD
                     </label>
                   </div>
+                </div>
+
+                <div className='input-group mb-2'>
+                  <label className='input-group-text' htmlFor='uidCoordinadora'>
+                    <i className='fas fa-user-gear'></i>
+                  </label>
+                  <div className='form-floating'>
+                    <select
+                      className='form-select'
+                      id='uidCoordinadora'
+                      required
+                      value={uidCoordinadora}
+                      onChange={(e) => setUidCoordinadora(e.target.value)}
+                    >
+                      <option value='' disabled>
+                        Seleccionar...
+                      </option>
+                      {usuariosAdmin.map((usuario) => (
+                        <option key={usuario.uid} value={usuario.uid}>
+                          {usuario.nombre}
+                        </option>
+                      ))}
+                    </select>
+                    <label htmlFor='uidCoordinadora'>
+                      Coordinadora<sup className='text-danger'>*</sup>
+                    </label>
+                  </div>
+                </div>
+
+                <div className='form-floating'>
+                  <textarea
+                    className='form-control form-control-sm'
+                    placeholder='Deja tus observaciones aquí...'
+                    id='nota'
+                    style={{ height: '100px' }}
+                    name='nota'
+                    onChange={handleChange}
+                    value={form['nota']}
+                  ></textarea>
+                  <label htmlFor='nota'>
+                    <i className='fas fa-comments me-1' />
+                    NOTA
+                  </label>
                 </div>
               </div>
               <div className='modal-footer'>

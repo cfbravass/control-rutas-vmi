@@ -62,6 +62,8 @@ export const useAlmacenes = () => {
         nombre: datos.nombre?.trim() || '',
         ciudad: datos.ciudad?.trim() || '',
         direccion: datos.direccion?.trim() || '',
+        uidCoordinadora: datos.uidCoordinadora,
+        nota: datos.nota?.trim().replace(/\n/g, '\\n') || '',
         ubicacion,
       }
       await agregarDocumento(datosDocumento)
@@ -96,11 +98,14 @@ export const useAlmacenes = () => {
         nombre: nuevoNombre?.trim() || '',
         ciudad: nuevosDatos.ciudad?.trim() || '',
         direccion: nuevosDatos.direccion?.trim() || '',
+        nota: nuevosDatos.nota?.trim().replace(/\n/g, '\\n') || '',
+        uidCoordinadora: nuevosDatos.uidCoordinadora,
         ubicacion,
       }
 
       await editarDocumento(id, datosDocumento)
     } catch (error) {
+      toast.error(error.message)
       console.error(error)
       throw error
     }
