@@ -39,13 +39,20 @@ export default function AuthContextProvider({ children }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        toast.update('loginToast', {
-          render: 'Validando permisos...',
-          hideProgressBar: false,
-          autoClose: 5000,
-          isLoading: true,
-          pauseOnHover: false,
-        })
+        if (!toast.isActive('loginToast')) {
+          toast.loading('Validando sesión...', {
+            position: toast.POSITION.BOTTOM_CENTER,
+            toastId: 'loginToast',
+          })
+        } else {
+          toast.update('loginToast', {
+            render: 'Comprobando permisos...',
+            hideProgressBar: false,
+            autoClose: 5000,
+            isLoading: true,
+            pauseOnHover: false,
+          })
+        }
 
         setLoadingAuth(true)
         setCurrentUser(user)
@@ -84,6 +91,7 @@ export default function AuthContextProvider({ children }) {
         setUserData(null)
         setUserRoles([])
         setLoadingAuth(false)
+        toast.dismiss('loginToast')
       }
     })
     return () => {

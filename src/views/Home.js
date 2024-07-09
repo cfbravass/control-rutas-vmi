@@ -17,7 +17,7 @@ const Home = () => {
       <div className='row d-flex justify-content-center'>
         <div className='col-12 col-sm-10 col-md-8'>
           <p>
-            ¡Bienvenido {currentUser.displayName} a nuestro sistema de control
+            ¡Bienvenida {currentUser.displayName} a nuestro sistema de control
             de rutas de promotoras de VMI Vanessa!
           </p>
           <p>

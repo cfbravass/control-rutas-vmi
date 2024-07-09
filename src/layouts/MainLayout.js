@@ -39,7 +39,7 @@ const MainLayout = () => {
                   className='nav-link btn btn-light fw-semibold mx-1'
                   to='/'
                 >
-                  Inicio
+                  <i className='fas fa-house me-1'></i> Inicio
                 </NavLink>
               </li>
               {userRoles.includes(ROLES.Admin) && (
@@ -49,7 +49,7 @@ const MainLayout = () => {
                     data-bs-toggle='dropdown'
                     aria-expanded='false'
                   >
-                    Maestros
+                    <i className='fas fa-gears me-1'></i> Maestros
                   </button>
                   <ul className='dropdown-menu'>
                     <li>
@@ -57,7 +57,7 @@ const MainLayout = () => {
                         className='dropdown-item btn btn-light'
                         to='/maestros/rutas'
                       >
-                        Rutas
+                        <i className='fas fa-route me-1'></i> Rutas
                       </NavLink>
                     </li>
                     <li>
@@ -65,7 +65,7 @@ const MainLayout = () => {
                         className='dropdown-item btn btn-light'
                         to='/maestros/almacenes'
                       >
-                        Almacenes
+                        <i className='fas fa-shop me-1'></i> Almacenes
                       </NavLink>
                     </li>
                     <li>
@@ -73,7 +73,7 @@ const MainLayout = () => {
                         className='dropdown-item btn btn-light'
                         to='/maestros/usuarios'
                       >
-                        Usuarios
+                        <i className='fas fa-users me-1'></i> Usuarios
                       </NavLink>
                     </li>
                   </ul>
@@ -84,7 +84,7 @@ const MainLayout = () => {
                   className='nav-link btn btn-light fw-semibold mx-1'
                   to='/rutas'
                 >
-                  Rutas
+                  <i className='fas fa-map-location-dot me-1'></i> Hoja de rutas
                 </NavLink>
               </li>
             </ul>
