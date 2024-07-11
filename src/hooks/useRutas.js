@@ -21,9 +21,7 @@ function useRutas(activo = null) {
       })
       const { latitude, longitude } = geo.coords
 
-      const novedad = prompt(
-        'Ingrese novedades si tuvo alguna o pulse aceptar:'
-      )
+      const novedad = prompt(`Ingrese la novedad de ${tipo} o pulse aceptar`)
 
       if (novedad === null) {
         return

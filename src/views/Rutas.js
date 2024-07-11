@@ -105,42 +105,85 @@ function Rutas() {
   return (
     <>
       <div className='mx-1 mx-sm-2 mx-md-5'>
-        <h1 className='text-center'>MI HOJA DE RUTAS</h1>
+        <h1 className='text-center h2'>MI HOJA DE RUTAS</h1>
         <br />
         {cargandoRutas ? (
           <Cargando />
         ) : (
           <div className='row m-0 justify-content-center align-items-center'>
-            {rutasVigentes.map((ruta) => (
-              <div
-                className='col-11 col-sm-7 col-md-6 col-lg-4 col-xl-3 col-xxl-2'
-                key={ruta.id}
-              >
-                <div className='card border-dark mb-4'>
-                  <div className='card-header text-bg-primary text-center'>
-                    <h5 className='m-0'>
-                      <i className='far fa-calendar me-1 fs-3'></i>{' '}
-                      {ruta.fecha.toDate().toLocaleDateString('es-ES', {
-                        weekday: 'short',
-                        day: 'numeric',
-                        month: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </h5>
-                  </div>
-                  <div className='card-body d-none'>
-                    <h5 className='card-title'>Titulo</h5>
-                    <p className='card-text'>Descripción</p>
-                  </div>
+            {rutasVigentes.map((ruta) => {
+              if (ruta === rutasVigentes[0]) {
+                return (
+                  <div className='row col-12 justify-content-center'>
+                    <div
+                      className='col-11 col-sm-7 col-md-6 col-lg-4 col-xl-3 col-xxl-2'
+                      key={ruta.id}
+                    >
+                      <div className='card border-dark mb-4'>
+                        <div className='card-header text-bg-primary text-center'>
+                          <h5 className='m-0'>
+                            <i className='far fa-calendar me-1 fs-3'></i>
+                            <br /> Ruta de hoy{' '}
+                            {ruta.fecha.toDate().toLocaleDateString('es-ES', {
+                              weekday: 'long',
+                            })}
+                            <br />
+                            {ruta.fecha.toDate().toLocaleDateString('es-ES', {
+                              day: 'numeric',
+                              month: 'numeric',
+                              year: 'numeric',
+                            })}
+                          </h5>
+                        </div>
+                        <div className='card-body d-none'>
+                          <h5 className='card-title'>Titulo</h5>
+                          <p className='card-text'>Descripción</p>
+                        </div>
 
-                  <div className='list-group list-group-flush'>
-                    {Object.entries(ruta.almacenes).map(([almacen, visita]) =>
-                      renderButton(ruta, almacen, visita)
-                    )}
+                        <div className='list-group list-group-flush'>
+                          {Object.entries(ruta.almacenes).map(
+                            ([almacen, visita]) =>
+                              renderButton(ruta, almacen, visita)
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                )
+              } else {
+                return (
+                  <div
+                    className='col-11 col-sm-7 col-md-6 col-lg-4 col-xl-3 col-xxl-2'
+                    key={ruta.id}
+                  >
+                    <div className='card border-dark mb-4'>
+                      <div className='card-header text-bg-secondary text-center'>
+                        <h5 className='m-0'>
+                          <i className='far fa-calendar me-1 fs-3'></i>{' '}
+                          {ruta.fecha.toDate().toLocaleDateString('es-ES', {
+                            weekday: 'short',
+                            day: 'numeric',
+                            month: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </h5>
+                      </div>
+                      <div className='card-body d-none'>
+                        <h5 className='card-title'>Titulo</h5>
+                        <p className='card-text'>Descripción</p>
+                      </div>
+
+                      <div className='list-group list-group-flush'>
+                        {Object.entries(ruta.almacenes).map(
+                          ([almacen, visita]) =>
+                            renderButton(ruta, almacen, visita)
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+            })}
           </div>
         )}
       </div>
