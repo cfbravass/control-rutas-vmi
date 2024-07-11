@@ -14,12 +14,10 @@ import {
 } from 'firebase/firestore'
 import { db } from '../firebaseApp'
 import { toast } from 'react-toastify'
-import { useAuth } from '../contexts/AuthContext'
 
 const useFirestore = (collectionName, activo = null) => {
   const [datos, setDatos] = useState([])
   const [cargando, setCargando] = useState(true)
-  const { isAuthenticated } = useAuth()
 
   // Función para obtener los documentos de una colección
   const obtenerDocumentos = async () => {
@@ -99,12 +97,9 @@ const useFirestore = (collectionName, activo = null) => {
     setCargando(true)
     try {
       const documentRef = doc(db, collectionName, documentId)
+
+      // Agregar los datos actualizados al documento en Firestore sin sobrescribir los datos existentes
       await updateDoc(documentRef, updatedData)
-      /* setDatos((prevData) =>
-        prevData.map((doc) =>
-          doc.id === documentId ? { id: doc.id, ...doc, ...updatedData } : doc
-        )
-      ) */
     } catch (error) {
       toast.error(
         `Error al actualizar el documento '${collectionName}/${documentId}'`
