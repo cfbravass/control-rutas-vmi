@@ -1,5 +1,4 @@
-import { doc, updateDoc, serverTimestamp, GeoPoint } from 'firebase/firestore'
-import { db } from '../firebaseApp'
+import { serverTimestamp, GeoPoint } from 'firebase/firestore'
 import { toast } from 'react-toastify'
 import useFirestore from './useFirestore'
 
@@ -11,52 +10,44 @@ function useRutas(activo = null) {
     agregarDocumento,
   } = useFirestore('rutas', activo)
 
-  const marcarLlegada = async (ruta, fecha, nombreAlmacen, novedad) => {
+  const marcarFichaje = async (ruta, almacen, tipo) => {
     try {
-      const position = await new Promise((resolve, reject) => {
+      if (['ingreso', 'salida'].includes(tipo) === false) {
+        throw new Error('Tipo de fichaje no permitido')
+      }
+
+      const geo = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject)
       })
-      const { latitude, longitude } = position.coords
+      const { latitude, longitude } = geo.coords
 
-      const almacenRef = [`locaciones.${fecha}.${nombreAlmacen}`]
+      const novedad = prompt(
+        'Ingrese novedades si tuvo alguna o pulse aceptar:'
+      )
+
+      if (novedad === null) {
+        return
+      }
 
       await editarDocumento(ruta.id, {
-        [`${almacenRef}.fechaIngreso`]: serverTimestamp(),
-        [`${almacenRef}.ubicacionIngreso`]: new GeoPoint(latitude, longitude),
-        [`${almacenRef}.novedadIngreso`]: novedad,
+        [`almacenes.${almacen}`]: {
+          ...ruta.almacenes[almacen],
+          [tipo === 'ingreso' ? 'horaIngreso' : 'horaSalida']:
+            serverTimestamp(),
+          [tipo === 'ingreso' ? 'ubicacionIngreso' : 'ubicacionSalida']:
+            new GeoPoint(latitude, longitude),
+          [tipo === 'ingreso' ? 'novedadIngreso' : 'novedadSalida']: novedad,
+        },
       })
     } catch (error) {
-      toast.error(error)
+      toast.error(error.message)
       console.error(error)
-      throw error
-    }
-  }
-
-  const marcarSalida = async (ruta, fecha, nombreAlmacen) => {
-    const rutaDocRef = doc(db, 'rutas', ruta.id)
-
-    try {
-      const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject)
-      })
-      const { latitude, longitude } = position.coords
-
-      const almacenRef = [`locaciones.${fecha}.${nombreAlmacen}`]
-
-      await updateDoc(rutaDocRef, {
-        [`${almacenRef}.fechaSalida`]: serverTimestamp(),
-        [`${almacenRef}.ubicacionSalida`]: new GeoPoint(latitude, longitude),
-      })
-    } catch (error) {
-      console.error(error)
-      throw error
     }
   }
 
   return {
     datos: rutas,
-    marcarLlegada,
-    marcarSalida,
+    marcarFichaje,
     crearRuta: agregarDocumento,
     cargandoRutas,
   }

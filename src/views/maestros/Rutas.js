@@ -121,7 +121,7 @@ function MaestroRutas() {
     }
 
     if (Object.keys(selectedValues).length === 0) {
-      toast.warning('No hay datos para guardar')
+      toast.error('No hay datos para guardar')
       return null
     }
 
@@ -132,28 +132,26 @@ function MaestroRutas() {
     const agrupacionPorFecha = {}
 
     for (const [key, value] of Object.entries(selectedValues)) {
-      let [fecha] = key.split('_')
+      let [fechaStr] = key.split('_')
 
-      fecha = new Date(fecha.split('-').reverse().join('-')).setHours(
-        0,
-        0,
-        0,
-        0
+      const fechaTimeStamp = Timestamp.fromDate(
+        new Date(
+          fechaStr.split('-')[2],
+          fechaStr.split('-')[1] - 1,
+          fechaStr.split('-')[0]
+        )
       )
 
-      fecha = Timestamp.fromDate(fecha)
-
-      if (!agrupacionPorFecha[fecha]) {
-        agrupacionPorFecha[fecha] = {
+      if (!agrupacionPorFecha[fechaStr]) {
+        agrupacionPorFecha[fechaStr] = {
           nombreUsuario,
           uidUsuario,
-          fecha,
-          almacenes: [value], // Iniciar con el primer almacen encontrado
-          activo: true,
+          fecha: fechaTimeStamp,
+          almacenes: { [value]: {} },
         }
       } else {
-        // Si la fecha ya fue agregada, simplemente añadimos el almacen al array existente
-        agrupacionPorFecha[fecha].almacenes.push(value)
+        // Si la fecha ya fue agregada, simplemente añadimos el almacen al map existente
+        agrupacionPorFecha[fechaStr].almacenes[value] = {}
       }
     }
 
@@ -320,20 +318,9 @@ function MaestroRutas() {
       <h1 className='text-center'>Maestro de Rutas</h1>
       <br />
       <section className='rounded border p-2 mb-3'>
-        <h4 className='text-center'>Asignar una nueva ruta</h4>
+        <h5 className='text-center'>Crear nueva hoja de rutas</h5>
         <form onSubmit={handleSubmit} className='needs-validation' noValidate>
-          <div className='text-center'>
-            <DatePicker
-              selected={startDate}
-              onChange={handleDateChange}
-              startDate={startDate}
-              endDate={endDate}
-              selectsRange
-              inline
-              className='text-center'
-            />
-          </div>
-          <div className='input-group mb-3'>
+          <div className='input-group mb-1'>
             <label htmlFor='listaUsuarios' className='input-group-text'>
               <i className='fas fa-id-card-clip me-1'></i> Promotora:
             </label>
@@ -357,6 +344,17 @@ function MaestroRutas() {
                 ))}
             </datalist>
           </div>
+          <div className='text-center mb-1'>
+            <DatePicker
+              selected={startDate}
+              onChange={handleDateChange}
+              startDate={startDate}
+              endDate={endDate}
+              selectsRange
+              inline
+              className='text-center'
+            />
+          </div>
 
           {usuarios
             .filter((u) => u.activo)
@@ -379,7 +377,8 @@ function MaestroRutas() {
           ) : (
             <div className='text-center px-5'>
               <p className='text-danger fa-bounce'>
-                No se han encontrado resultados
+                <i className='fas fa-exclamation-triangle me-2'></i>
+                No ha seleccionado una promotora válida
               </p>
             </div>
           )}
