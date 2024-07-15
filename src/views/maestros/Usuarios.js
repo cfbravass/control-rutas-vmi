@@ -6,7 +6,7 @@ import { useUsuarios } from '../../contexts/UsuariosContext'
 import Cargando from '../../components/Cargando'
 
 export default function MaestroUsuarios() {
-  const { sendPasswordResetEmail } = useAuth()
+  const { sendPasswordResetEmail, currentUser } = useAuth()
   const {
     datos: usuarios,
     cargando,
@@ -40,6 +40,7 @@ export default function MaestroUsuarios() {
     // Filtramos los usuarios por el criterio de busqueda
     setUsuariosFiltrados(
       usuarios
+        .filter((usuario) => usuario.uidCoordinadora === currentUser.uid)
         .filter((usuario) =>
           usuario.nombre.toUpperCase().includes(valorBusqueda)
         )
@@ -49,9 +50,13 @@ export default function MaestroUsuarios() {
   }
 
   useEffect(() => {
-    // Al inicio, mostramos todos los almacenes sin filtrar (ordenados por activo y luego inactivo)
-    setUsuariosFiltrados(usuarios.sort((a, b) => b.activo - a.activo))
-  }, [usuarios])
+    // Al inicio, mostramos todos los almacenes filtrados segun si uidCoordinadora es igual a currentUser.uid (ordenados por activo y luego inactivo)
+    setUsuariosFiltrados(
+      usuarios
+        .filter((usuario) => usuario.uidCoordinadora === currentUser.uid)
+        .sort((a, b) => b.activo - a.activo)
+    )
+  }, [usuarios, currentUser])
 
   return (
     <>

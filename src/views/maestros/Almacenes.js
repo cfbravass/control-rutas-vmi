@@ -5,6 +5,7 @@ import Cargando from '../../components/Cargando'
 import ModalEditarAlmacen from '../../components/almacenes/ModalEditar'
 import { useAlmacenes } from '../../contexts/AlmacenesContext'
 import { useUsuarios } from '../../contexts/UsuariosContext'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function MaestroAlmacenes() {
   const {
@@ -19,6 +20,7 @@ export default function MaestroAlmacenes() {
   const [buscarCiudad, setBuscarCiudad] = useState('')
   const [almacenesFiltrados, setAlmacenesFiltrados] = useState([])
   const [usuariosAdmin, setUsuariosAdmin] = useState([])
+  const { currentUser } = useAuth()
 
   useEffect(() => {
     // Creamos una lista de ciudades con todos los almacenes
@@ -26,8 +28,12 @@ export default function MaestroAlmacenes() {
     // Eliminamos duplicados utilizando Set y luego lo convertimos a un array nuevamente
     setCiudades([...new Set(listaCiudades)])
     // Al inicio, mostramos todos los almacenes sin filtrar (ordenados por activo y luego inactivo)
-    setAlmacenesFiltrados(almacenes.sort((a, b) => b.activo - a.activo))
-  }, [almacenes])
+    setAlmacenesFiltrados(
+      almacenes
+        .filter((a) => a.uidCoordinadora === currentUser.uid)
+        .sort((a, b) => b.activo - a.activo)
+    )
+  }, [almacenes, currentUser])
 
   useEffect(() => {
     setUsuariosAdmin(
@@ -46,7 +52,8 @@ export default function MaestroAlmacenes() {
         .filter(
           (almacen) =>
             almacen.nombre.toUpperCase().includes(valorBusqueda) &&
-            (!buscarCiudad || almacen.ciudad === buscarCiudad)
+            (!buscarCiudad || almacen.ciudad === buscarCiudad) &&
+            almacen.uidCoordinadora === currentUser.uid
         )
         // Ordenar primero Activos y luego Inactivos
         .sort((a, b) => b.activo - a.activo)
@@ -64,7 +71,8 @@ export default function MaestroAlmacenes() {
         .filter(
           (almacen) =>
             almacen.nombre.toUpperCase().includes(buscarNombre) &&
-            (!buscarCiudad || almacen.ciudad === buscarCiudad)
+            (!buscarCiudad || almacen.ciudad === buscarCiudad) &&
+            almacen.uidCoordinadora === currentUser.uid
         )
         // Ordenar primero Activos y luego Inactivos
         .sort((a, b) => b.activo - a.activo)

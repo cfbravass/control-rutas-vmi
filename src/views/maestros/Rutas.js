@@ -8,10 +8,12 @@ import { Timestamp } from 'firebase/firestore'
 import useRutas from '../../hooks/useRutas'
 import { useUsuarios } from '../../contexts/UsuariosContext'
 import { useAlmacenes } from '../../contexts/AlmacenesContext'
+import { useAuth } from '../../contexts/AuthContext'
 
 function MaestroRutas() {
   const [startDate, setStartDate] = useState(new Date())
   const [endDate, setEndDate] = useState(startDate)
+  const { currentUser } = useAuth()
 
   const [almacenesValidos, setAlmacenesValidos] = useState({})
   const [formularioValido, setFormularioValido] = useState(false)
@@ -62,7 +64,7 @@ function MaestroRutas() {
     setAlmacenesValidos({})
     setUsuarioValido(
       usuarios
-        .filter((u) => u.activo)
+        .filter((u) => u.activo && u.uidCoordinadora === currentUser.uid)
         .some((usuario) => usuario.nombre === nombreUsuario)
     )
     setFormularioValido(false)
@@ -338,7 +340,9 @@ function MaestroRutas() {
             />
             <datalist id='datalistOptions'>
               {usuarios
-                .filter((u) => u.activo)
+                .filter(
+                  (u) => u.activo && u.uidCoordinadora === currentUser.uid
+                )
                 .map((usuario) => (
                   <option key={usuario.uid} value={usuario.nombre} />
                 ))}
@@ -356,9 +360,12 @@ function MaestroRutas() {
             />
           </div>
 
-          {usuarios
-            .filter((u) => u.activo)
-            .find((u) => u.nombre === selectedUsuario) ? (
+          {usuarios.find(
+            (u) =>
+              u.nombre === selectedUsuario &&
+              u.activo &&
+              u.uidCoordinadora === currentUser.uid
+          ) ? (
             <>
               <div className='row px-3 d-flex justify-content-center'>
                 {renderFechaSelectors()}
