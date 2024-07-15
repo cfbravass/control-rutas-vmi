@@ -109,21 +109,34 @@ function Rutas() {
         <br />
         {cargandoRutas ? (
           <Cargando />
+        ) : rutasVigentes.length === 0 ? (
+          /* Alerta bien bonita que indique que el usuario no tienen niguna ruta programada */
+          <div className='alert alert-warning text-center' role='alert'>
+            <i className='fas fa-exclamation-triangle fa-2x'></i>
+            <h4 className='alert-heading'>¡No tienes rutas programadas!</h4>
+            <p>
+              Tu coordinadora no ha programado ninguna ruta para el día,
+              aprovecha para descansar y recargar energías.
+            </p>
+          </div>
         ) : (
           <div className='row m-0 justify-content-center align-items-center'>
             {rutasVigentes.map((ruta) => {
               if (ruta === rutasVigentes[0]) {
                 return (
-                  <div className='row col-12 justify-content-center'>
+                  <div
+                    className='row col-12 justify-content-center'
+                    key={ruta.id}
+                  >
                     <div
-                      className='col-11 col-sm-7 col-md-6 col-lg-4 col-xl-3 col-xxl-2'
+                      className='col-11 col-sm-7 col-md-6 col-lg-4 col-xl-3 col-xxl-2 p-0'
                       key={ruta.id}
                     >
                       <div className='card border-dark mb-4'>
                         <div className='card-header text-bg-primary text-center'>
                           <h5 className='m-0'>
                             <i className='far fa-calendar me-1 fs-3'></i>
-                            <br /> Ruta de hoy{' '}
+                            <br />
                             {ruta.fecha.toDate().toLocaleDateString('es-ES', {
                               weekday: 'long',
                             })}
@@ -159,9 +172,13 @@ function Rutas() {
                     <div className='card border-dark mb-4'>
                       <div className='card-header text-bg-secondary text-center'>
                         <h5 className='m-0'>
-                          <i className='far fa-calendar me-1 fs-3'></i>{' '}
+                          <i className='far fa-calendar me-1 fs-3'></i>
+                          <br />
                           {ruta.fecha.toDate().toLocaleDateString('es-ES', {
-                            weekday: 'short',
+                            weekday: 'long',
+                          })}
+                          <br />
+                          {ruta.fecha.toDate().toLocaleDateString('es-ES', {
                             day: 'numeric',
                             month: 'numeric',
                             year: 'numeric',
