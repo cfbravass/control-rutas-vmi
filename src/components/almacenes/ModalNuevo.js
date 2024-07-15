@@ -7,10 +7,10 @@ export default function ModalNuevoAlmacen({
   crearAlmacen,
   usuariosAdmin,
 }) {
+  const { currentUser } = useAuth()
   const [nombresAlmacenes, setNombresAlmacenes] = useState([])
   const [nombreExistente, setNombreExistente] = useState(false)
-  const [uidCoordinadora, setUidCoordinadora] = useState('')
-  const { currentUser } = useAuth()
+  const [uidCoordinadora, setUidCoordinadora] = useState(currentUser.uid)
 
   const [form, setForm] = useState({
     nombre: '',

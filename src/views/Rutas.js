@@ -6,6 +6,8 @@ import Cargando from '../components/Cargando'
 /* Hooks */
 import useRutas from '../hooks/useRutas'
 
+import { useAuth } from '../contexts/AuthContext'
+
 /* Imagenes */
 import imgRutaCompletada from '../static/assets/img/ruta-completada.png'
 import logoIngresar from '../static/assets/img/logo-entrar.png'
@@ -13,6 +15,7 @@ import logoSalir from '../static/assets/img/logo-salir.png'
 import xCalendario from '../static/assets/img/xcalendario.png'
 
 function Rutas() {
+  const { currentUser } = useAuth()
   const [rutasVigentes, setRutasVigentes] = useState([])
   const { datos: rutas, marcarFichaje, cargandoRutas } = useRutas()
 
@@ -92,15 +95,15 @@ function Rutas() {
 
   useEffect(() => {
     const rutasVigentes = rutas
-      .filter((ruta) => {
-        const fechaRuta = ruta.fecha.toDate()
-        const fechaActual = new Date().setHours(0, 0, 0, 0)
-        return fechaRuta >= fechaActual
-      })
+      .filter(
+        (ruta) =>
+          ruta.uidUsuario === currentUser.uid &&
+          ruta.fecha.toDate() >= new Date().setHours(0, 0, 0, 0)
+      )
       .sort((a, b) => a.fecha.toDate() - b.fecha.toDate())
 
     setRutasVigentes(rutasVigentes)
-  }, [rutas])
+  }, [rutas, currentUser])
 
   return (
     <>

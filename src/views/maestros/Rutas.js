@@ -102,7 +102,10 @@ function MaestroRutas() {
     setAlmacenesValidos((prevValidos) => ({
       ...prevValidos,
       [key]: almacenesActivos.some(
-        (almacen) => almacen.nombre === selectedValue
+        (almacen) =>
+          almacen.nombre === selectedValue &&
+          almacen.activo &&
+          almacen.uidCoordinadora === currentUser.uid
       ),
     }))
 
@@ -148,6 +151,7 @@ function MaestroRutas() {
         agrupacionPorFecha[fechaStr] = {
           nombreUsuario,
           uidUsuario,
+          uidCoordinadora: currentUser.uid,
           fecha: fechaTimeStamp,
           almacenes: { [value]: {} },
         }
@@ -230,15 +234,25 @@ function MaestroRutas() {
                   onChange={(e) => handleAlmacenChange(e, formattedDate, 1)}
                 />
                 <datalist id={`opcionesAlmacen-${formattedDate}-1`}>
-                  {almacenesActivos.map((almacen) => (
-                    <option key={almacen.id} value={almacen.nombre} />
-                  ))}
+                  {almacenesActivos
+                    .filter(
+                      (almacen) =>
+                        almacen.activo &&
+                        almacen.uidCoordinadora === currentUser.uid
+                    )
+                    .map((almacen) => (
+                      <option key={almacen.id} value={almacen.nombre} />
+                    ))}
                 </datalist>
               </div>
 
-              {almacenesActivos.some(
-                (almacen) => almacen.nombre === almacen1Value
-              ) && (
+              {almacenesActivos
+                .filter(
+                  (almacen) =>
+                    almacen.activo &&
+                    almacen.uidCoordinadora === currentUser.uid
+                )
+                .some((almacen) => almacen.nombre === almacen1Value) && (
                 <>
                   <div>
                     <input
@@ -258,16 +272,25 @@ function MaestroRutas() {
                     />
                     <datalist id={`opcionesAlmacen-${formattedDate}-2`}>
                       {almacenesActivos
-                        .filter((almacen) => almacen.nombre !== almacen1Value)
+                        .filter(
+                          (almacen) =>
+                            almacen.nombre !== almacen1Value &&
+                            almacen.activo &&
+                            almacen.uidCoordinadora === currentUser.uid
+                        )
                         .map((almacen) => (
                           <option key={almacen.id} value={almacen.nombre} />
                         ))}
                     </datalist>
                   </div>
 
-                  {almacenesActivos.some(
-                    (almacen) => almacen.nombre === almacen2Value
-                  ) && (
+                  {almacenesActivos
+                    .filter(
+                      (almacen) =>
+                        almacen.activo &&
+                        almacen.uidCoordinadora === currentUser.uid
+                    )
+                    .some((almacen) => almacen.nombre === almacen2Value) && (
                     <div>
                       <input
                         className={`form-control my-2 ${
@@ -292,7 +315,9 @@ function MaestroRutas() {
                             (almacen) =>
                               ![almacen1Value, almacen2Value].includes(
                                 almacen.nombre
-                              )
+                              ) &&
+                              almacen.activo &&
+                              almacen.uidCoordinadora === currentUser.uid
                           )
                           .map((almacen) => (
                             <option key={almacen.id} value={almacen.nombre} />
