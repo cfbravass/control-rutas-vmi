@@ -1,5 +1,4 @@
 import { addDays, format } from 'date-fns'
-import { es } from 'date-fns/locale'
 import { toast } from 'react-toastify'
 import DatePicker from 'react-datepicker'
 import React, { useState, useEffect } from 'react'
@@ -198,9 +197,7 @@ function MaestroRutas() {
     let currentDate = startDate
 
     while (currentDate <= endDate) {
-      const formattedDate = format(currentDate, 'dd-MM-yyyy', {
-        locale: es,
-      })
+      const formattedDate = format(currentDate, 'dd-MM-yyyy')
 
       const almacen1Key = `${formattedDate}_almacen1`
       const almacen2Key = `${formattedDate}_almacen2`

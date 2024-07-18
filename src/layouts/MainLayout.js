@@ -39,7 +39,7 @@ const MainLayout = () => {
                   className='nav-link btn btn-light fw-semibold mx-1'
                   to='/'
                 >
-                  <i className='fas fa-house me-1'></i> Inicio
+                  <i className='fas fa-house'></i> Inicio
                 </NavLink>
               </li>
               {userRoles.includes(ROLES.Admin) && (
@@ -49,7 +49,7 @@ const MainLayout = () => {
                     data-bs-toggle='dropdown'
                     aria-expanded='false'
                   >
-                    <i className='fas fa-gears me-1'></i> Maestros
+                    <i className='fas fa-gears'></i> Maestros
                   </button>
                   <ul className='dropdown-menu'>
                     <li>
@@ -57,7 +57,7 @@ const MainLayout = () => {
                         className='dropdown-item btn btn-light'
                         to='/maestros/rutas'
                       >
-                        <i className='fas fa-route me-1'></i> Rutas
+                        <i className='fas fa-route mx-1'></i> Rutas
                       </NavLink>
                     </li>
                     <li>
@@ -84,7 +84,7 @@ const MainLayout = () => {
                   className='nav-link btn btn-light fw-semibold mx-1'
                   to='/rutas'
                 >
-                  <i className='fas fa-map-location-dot me-1'></i> Hoja de rutas
+                  <i className='fas fa-map-location-dot'></i> Hoja de rutas
                 </NavLink>
               </li>
             </ul>

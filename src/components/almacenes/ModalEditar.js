@@ -15,7 +15,7 @@ export default function ModalEditarAlmacen({
     direccion: almacen.direccion || '',
     latitud: almacen.ubicacion.latitude || 0,
     longitud: almacen.ubicacion.longitude || 0,
-    nota: almacen.nota.replace(/\\n/g, '\n') || '',
+    nota: almacen.nota?.replace(/\\n/g, '\n') || '',
   })
   const [uidCoordinadora, setUidCoordinadora] = useState('')
 

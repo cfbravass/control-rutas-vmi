@@ -7,13 +7,13 @@ const Home = () => {
 
   return (
     <div className='container text-center'>
-      <h1>Control de Rutas VMI</h1>
       <img
         src={logoAzul}
         alt='Logo Vanessa Azul'
         height={'69px'}
-        className='mb-3'
+        className='mb-4'
       />
+      <h1 className='mb-3'>Control de Rutas VMI</h1>
       <div className='row d-flex justify-content-center'>
         <div className='col-12 col-sm-10 col-md-8'>
           <p>
