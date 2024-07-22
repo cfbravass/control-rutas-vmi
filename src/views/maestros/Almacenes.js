@@ -95,7 +95,7 @@ export default function MaestroAlmacenes() {
               Listado de almacenes [{almacenesFiltrados.length}/
               {almacenes.length}]
             </caption>
-            <thead className='table-primary'>
+            <thead className='table-dark'>
               <tr>
                 <th
                   scope='col'
@@ -105,7 +105,7 @@ export default function MaestroAlmacenes() {
                   <i className='fas fa-signal' />
                 </th>
                 <th scope='col'>
-                  <div className='form-floating'>
+                  <div className='form-floating text-dark'>
                     <select
                       className='form-select'
                       aria-label='Buscar...'
@@ -124,7 +124,7 @@ export default function MaestroAlmacenes() {
                   </div>
                 </th>
                 <th scope='col'>
-                  <div className='form-floating'>
+                  <div className='form-floating text-dark'>
                     <input
                       type='text'
                       className='form-control'

@@ -68,7 +68,7 @@ export default function MaestroUsuarios() {
             <caption>
               Listado de usuarios [{usuariosFiltrados.length}/{usuarios.length}]
             </caption>
-            <thead>
+            <thead className='table-dark'>
               <tr>
                 <th
                   scope='col'
@@ -78,7 +78,7 @@ export default function MaestroUsuarios() {
                   <i className='fas fa-signal' />
                 </th>
                 <th scope='col'>
-                  <div className='form-floating'>
+                  <div className='form-floating text-dark'>
                     <input
                       type='text'
                       className='form-control'
