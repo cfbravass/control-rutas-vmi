@@ -156,7 +156,7 @@ export default function MaestroAlmacenes() {
             <tbody className='table-group-divider'>
               {cargando ? (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={8}>
                     <Cargando />
                   </td>
                 </tr>

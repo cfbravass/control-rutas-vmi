@@ -100,7 +100,7 @@ export default function ModalEditarAlmacen({
 
       <div
         className='modal fade'
-        id={idModal}
+        id={`${idModal}`}
         tabIndex='-1'
         aria-labelledby='modalEditarAlmacenLabel'
         aria-hidden='true'
@@ -266,6 +266,7 @@ export default function ModalEditarAlmacen({
                   type='submit'
                   className='btn btn-success'
                   disabled={nombreExistente}
+                  data-bs-dismiss='modal'
                 >
                   Guardar
                 </button>
