@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
-
 /* Componentes */
 import Cargando from '../components/Cargando'
+import AdminRutas from '../components/rutas/AdminRutas'
 
 /* Hooks */
 import useRutas from '../hooks/useRutas'
@@ -15,9 +14,12 @@ import logoSalir from '../static/assets/img/logo-salir.png'
 import xCalendario from '../static/assets/img/xcalendario.png'
 
 function Rutas() {
-  const { currentUser } = useAuth()
-  const [rutasVigentes, setRutasVigentes] = useState([])
-  const { datos: rutas, marcarFichaje, cargandoRutas } = useRutas()
+  const { currentUser, userData } = useAuth()
+  const {
+    rutas,
+    cargando: cargandoRutas,
+    marcarFichaje,
+  } = useRutas(currentUser.uid)
 
   const renderButton = (ruta, almacen, visita) => {
     /* Validar si la ruta corresponde a la fecha actual y renderizar botones */
@@ -93,27 +95,16 @@ function Rutas() {
     }
   }
 
-  useEffect(() => {
-    const rutasVigentes = rutas
-      .filter(
-        (ruta) =>
-          ruta.uidUsuario === currentUser.uid &&
-          ruta.fecha.toDate() >= new Date().setHours(0, 0, 0, 0)
-      )
-      .sort((a, b) => a.fecha.toDate() - b.fecha.toDate())
-
-    setRutasVigentes(rutasVigentes)
-  }, [rutas, currentUser])
-
   return (
     <>
       <div className='mx-1 mx-sm-2 mx-md-5'>
-        <h1 className='text-center h2'>MI HOJA DE RUTAS</h1>
+        <h1 className='text-center h2'>HOJA DE RUTAS</h1>
         <br />
-        {cargandoRutas ? (
+        {userData?.roles.includes('admin') ? (
+          <AdminRutas />
+        ) : cargandoRutas ? (
           <Cargando />
-        ) : rutasVigentes.length === 0 ? (
-          /* Alerta bien bonita que indique que el usuario no tienen niguna ruta programada */
+        ) : rutas.length === 0 ? (
           <div className='alert alert-warning text-center' role='alert'>
             <i className='fas fa-exclamation-triangle fa-2x'></i>
             <h4 className='alert-heading'>¡No tienes rutas programadas!</h4>
@@ -124,8 +115,8 @@ function Rutas() {
           </div>
         ) : (
           <div className='row m-0 justify-content-center align-items-center'>
-            {rutasVigentes.map((ruta) => {
-              if (ruta === rutasVigentes[0]) {
+            {rutas.map((ruta) => {
+              if (ruta === rutas[0]) {
                 return (
                   <div
                     className='row col-12 justify-content-center'

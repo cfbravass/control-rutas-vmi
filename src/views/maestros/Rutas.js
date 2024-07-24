@@ -19,7 +19,7 @@ function MaestroRutas() {
   const [selectedUsuario, setSelectedUsuario] = useState('')
   const [selectedValues, setSelectedValues] = useState({})
   const [usuarioValido, setUsuarioValido] = useState(false)
-  const { crearRuta } = useRutas(false)
+  const { crearRuta } = useRutas()
   const { datos: almacenesActivos } = useAlmacenes(true)
   const { datos: usuarios } = useUsuarios()
 
@@ -125,9 +125,17 @@ function MaestroRutas() {
     }
 
     if (Object.keys(selectedValues).length === 0) {
-      toast.error('No hay datos para guardar')
+      toast.error('No hay datos para guardar', {
+        position: toast.POSITION.BOTTOM_CENTER,
+        autoClose: 3000,
+      })
       return null
     }
+
+    // Crear toast cargando mientras se procesa la petición
+    const toastId = toast.loading('Asignando las rutas...', {
+      position: toast.POSITION.BOTTOM_CENTER,
+    })
 
     const nombreUsuario = selectedUsuario
     const uidUsuario = usuarios.find((u) => u.nombre === selectedUsuario)?.uid
@@ -178,15 +186,28 @@ function MaestroRutas() {
         // Lógica para decidir qué mensaje mostrar
         if (exitos === resultados.length) {
           // Todos los intentos fueron exitosos
-          toast.success('Las rutas han sido asignadas correctamente')
+          toast.update(toastId, {
+            render: 'Rutas asignadas correctamente',
+            type: toast.TYPE.SUCCESS,
+            isLoading: false,
+            autoClose: 3000,
+          })
         } else if (fallos === resultados.length) {
           // Todos los intentos fallaron
-          toast.error('No se pudieron asignar las rutas')
+          toast.update(toastId, {
+            render: 'No se pudieron asignar las rutas',
+            type: toast.TYPE.ERROR,
+            isLoading: false,
+            autoClose: 3000,
+          })
         } else {
           // Algunos intentos fueron exitosos y otros fallaron
-          toast.warning(
-            `Se asignaron ${exitos} rutas correctamente, pero ${fallos} no se pudieron asignar.`
-          )
+          toast.update(toastId, {
+            render: `Se asignaron ${exitos} rutas correctamente, pero ${fallos} no se pudieron asignar.`,
+            type: toast.TYPE.WARNING,
+            isLoading: false,
+            autoClose: 5000,
+          })
         }
       })
       .finally(resetForm)
@@ -210,7 +231,8 @@ function MaestroRutas() {
       const fechaSelector = (
         <div
           key={formattedDate}
-          className='col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 text-center mb-3 border rounded bg-light py-2 px-1'
+          id={formattedDate}
+          className={`col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 text-center mb-3 border rounded bg-light py-2 px-1`}
         >
           <div>{formattedDate}</div>
           {selectedUsuario && (
