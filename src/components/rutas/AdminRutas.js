@@ -45,7 +45,7 @@ function AdminRutas() {
   return (
     <>
       <div
-        className='text-center form-floating mb-2'
+        className='text-center form-floating mb-2 mx-auto'
         style={{ width: '150px' }}
       >
         <input
