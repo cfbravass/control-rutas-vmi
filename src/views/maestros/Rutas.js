@@ -160,11 +160,21 @@ function MaestroRutas() {
           uidUsuario,
           uidCoordinadora: currentUser.uid,
           fecha: fechaTimeStamp,
-          almacenes: { [value]: {} },
+          almacenes: {
+            [value]: {
+              idAlmacen: almacenesActivos.find(
+                (almacen) => almacen.nombre === value
+              ).id,
+            },
+          },
         }
       } else {
         // Si la fecha ya fue agregada, simplemente añadimos el almacen al map existente
-        agrupacionPorFecha[fechaStr].almacenes[value] = {}
+        agrupacionPorFecha[fechaStr].almacenes[value] = {
+          idAlmacen: almacenesActivos.find(
+            (almacen) => almacen.nombre === value
+          ).id,
+        }
       }
     }
 

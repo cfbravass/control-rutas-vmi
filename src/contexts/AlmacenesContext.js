@@ -111,6 +111,11 @@ export const useAlmacenes = () => {
     }
   }
 
+  // Funcion para obtener un almacen por su id
+  const obtenerAlmacen = (id) => {
+    return datos.find((almacen) => almacen.id === id)
+  }
+
   return {
     datos,
     cargando,
@@ -118,5 +123,6 @@ export const useAlmacenes = () => {
     modificarAlmacen,
     nombresAlmacenes,
     obtenerAlmacenesActivos,
+    obtenerAlmacen,
   }
 }
