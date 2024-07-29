@@ -10,16 +10,17 @@ import { useAlmacenes } from '../../contexts/AlmacenesContext'
 import { useAuth } from '../../contexts/AuthContext'
 
 function MaestroRutas() {
+  const [almacenesValidos, setAlmacenesValidos] = useState({})
   const [startDate, setStartDate] = useState(new Date())
   const [endDate, setEndDate] = useState(startDate)
-  const { currentUser } = useAuth()
-
-  const [almacenesValidos, setAlmacenesValidos] = useState({})
   const [formularioValido, setFormularioValido] = useState(false)
   const [selectedUsuario, setSelectedUsuario] = useState('')
   const [selectedValues, setSelectedValues] = useState({})
   const [usuarioValido, setUsuarioValido] = useState(false)
-  const { crearRuta } = useRutas()
+  const [rutasExistentes, setRutasExistentes] = useState({})
+  const { rutasPorFecha, filtrarRutasPorFecha, crearRuta, editarRuta } =
+    useRutas()
+  const { currentUser } = useAuth()
   const { datos: almacenesActivos } = useAlmacenes(true)
   const { datos: usuarios } = useUsuarios()
 
@@ -37,6 +38,33 @@ function MaestroRutas() {
 
     setFormularioValido(esFormularioValido)
   }, [almacenesValidos])
+
+  useEffect(() => {
+    // Funcion para validar si ya existe una ruta para la fecha seleccionada
+    const validarFechas = async () => {
+      if (!selectedUsuario || !startDate || !endDate) return null
+
+      const uidUsuario = usuarios.find((u) => u.nombre === selectedUsuario)?.uid
+      if (!uidUsuario) return null
+
+      await filtrarRutasPorFecha(startDate, endDate, uidUsuario)
+    }
+
+    validarFechas()
+
+    // eslint-disable-next-line
+  }, [selectedUsuario, startDate, endDate])
+
+  useEffect(() => {
+    const rutasExistentes = {}
+
+    rutasPorFecha.forEach((ruta) => {
+      const fecha = format(ruta.fecha.toDate(), 'dd-MM-yyyy')
+      rutasExistentes[fecha] = ruta
+    })
+
+    setRutasExistentes(rutasExistentes)
+  }, [rutasPorFecha])
 
   const resetForm = () => {
     setSelectedUsuario('')
@@ -118,6 +146,7 @@ function MaestroRutas() {
   }
 
   const handleSubmit = async (e) => {
+    console.log('Formulario enviado')
     e.preventDefault()
 
     if (!formularioValido) {
@@ -142,19 +171,44 @@ function MaestroRutas() {
 
     // Objeto para agrupar por fecha
     const agrupacionPorFecha = {}
+    const grupoEditado = {}
 
     for (const [key, value] of Object.entries(selectedValues)) {
       let [fechaStr] = key.split('_')
+      const editar = rutasExistentes[fechaStr] ? true : false
 
-      const fechaTimeStamp = Timestamp.fromDate(
-        new Date(
-          fechaStr.split('-')[2],
-          fechaStr.split('-')[1] - 1,
-          fechaStr.split('-')[0]
+      // Si se está editando, se eliminan los almacenes actuales y se agregan los nuevos datos al grupo editado
+      if (editar) {
+        const datosRuta = rutasExistentes[fechaStr]
+
+        const { id: idRuta, almacenes, ...restoDatos } = datosRuta
+
+        if (!grupoEditado[idRuta]) {
+          grupoEditado[idRuta] = {
+            ...restoDatos,
+            almacenes: {
+              [value]: {
+                idAlmacen: almacenesActivos.find(
+                  (almacen) => almacen.nombre === value
+                ).id,
+              },
+            },
+          }
+        } else {
+          grupoEditado[idRuta].almacenes[value] = {
+            idAlmacen: almacenesActivos.find(
+              (almacen) => almacen.nombre === value
+            ).id,
+          }
+        }
+      } else if (!agrupacionPorFecha[fechaStr]) {
+        const fechaTimeStamp = Timestamp.fromDate(
+          new Date(
+            fechaStr.split('-')[2],
+            fechaStr.split('-')[1] - 1,
+            fechaStr.split('-')[0]
+          )
         )
-      )
-
-      if (!agrupacionPorFecha[fechaStr]) {
         agrupacionPorFecha[fechaStr] = {
           nombreUsuario,
           uidUsuario,
@@ -179,6 +233,11 @@ function MaestroRutas() {
     }
 
     let promesasDeCreacion = []
+
+    // Si hay rutas a editar, se crean las promesas de edición
+    for (const [idRuta, datosRuta] of Object.entries(grupoEditado)) {
+      promesasDeCreacion.push(editarRuta(idRuta.split('|')[0], datosRuta))
+    }
 
     for (const datosRuta of Object.values(agrupacionPorFecha)) {
       // En este punto, cada `datosRuta` ya tiene su `almacenes` consolidado por fecha
@@ -238,11 +297,16 @@ function MaestroRutas() {
       const almacen2Value = selectedValues[almacen2Key] || ''
       const almacen3Value = selectedValues[almacen3Key] || ''
 
+      // true o false si ya existe una ruta para la fecha seleccionada
+      const rutaExistente = rutasExistentes[formattedDate]
+
       const fechaSelector = (
         <div
           key={formattedDate}
           id={formattedDate}
-          className={`col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 text-center mb-3 border rounded bg-light py-2 px-1`}
+          className={`col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 text-center mb-3 border rounded py-1 px-1 ${
+            rutaExistente ? 'bg-warning' : 'bg-light'
+          }`}
         >
           <div>{formattedDate}</div>
           {selectedUsuario && (

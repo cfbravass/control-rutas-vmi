@@ -4,10 +4,12 @@ import {
   collection,
   onSnapshot,
   getDoc,
+  getDocs,
   addDoc,
   setDoc,
   doc,
   updateDoc,
+  deleteDoc,
   where,
   query,
   and,
@@ -128,6 +130,22 @@ export default function useRutas(uidUsuario = '') {
     }
   }
 
+  // Funcion para eliminar un documento de ruta en Firestore
+  const eliminarRuta = async (idRuta) => {
+    setCargando(true)
+    try {
+      const documentRef = doc(db, 'rutas', idRuta)
+
+      // Eliminar el documento de Firestore
+      await deleteDoc(documentRef)
+    } catch (error) {
+      toast.error(`Error al eliminar la ruta ${idRuta}`)
+      console.error('Error al eliminar el documento:', error)
+    } finally {
+      setCargando(false)
+    }
+  }
+
   // Función para marcar un fichaje de ingreso o salida en una ruta
   const marcarFichaje = async (ruta, almacen, tipo) => {
     try {
@@ -163,17 +181,26 @@ export default function useRutas(uidUsuario = '') {
   }
 
   // Función para filtrar las rutas por fecha y escuchar cambios en tiempo real
-  const filtrarRutasPorFecha = async (fecha) => {
-    if (!fecha) return
+  const filtrarRutasPorFecha = async (
+    fechaInicio,
+    fechaFin = null,
+    uidUsuario = null
+  ) => {
+    if (!fechaInicio) return
 
     setCargando(true)
     try {
-      if (!(fecha instanceof Date)) {
+      if (!(fechaInicio instanceof Date)) {
         throw new Error('Fecha inválida')
       }
 
-      const fechaTimestamp = Timestamp.fromDate(
-        new Date(fecha.setHours(0, 0, 0, 0))
+      if (!fechaFin) fechaFin = fechaInicio
+
+      const fDesde = Timestamp.fromDate(
+        new Date(fechaInicio.setHours(0, 0, 0, 0))
+      )
+      const fHasta = Timestamp.fromDate(
+        new Date(fechaFin.setHours(23, 59, 59, 999))
       )
 
       if (unsubscribeRef.current) {
@@ -181,7 +208,13 @@ export default function useRutas(uidUsuario = '') {
       }
 
       const rutasRef = collection(db, 'rutas')
-      const q = query(rutasRef, where('fecha', '==', fechaTimestamp))
+      let q = query(
+        rutasRef,
+        where('fecha', '>=', fDesde),
+        where('fecha', '<=', fHasta)
+      )
+
+      if (uidUsuario) q = query(q, where('uidUsuario', '==', uidUsuario))
 
       const unsubscribe = onSnapshot(
         q,
@@ -222,6 +255,7 @@ export default function useRutas(uidUsuario = '') {
     rutasPorFecha,
     editarRuta,
     crearRuta,
+    eliminarRuta,
     marcarFichaje,
     filtrarRutasPorFecha,
   }
