@@ -24,7 +24,9 @@ export default function MaestroAlmacenes() {
 
   useEffect(() => {
     // Creamos una lista de ciudades con todos los almacenes
-    const listaCiudades = almacenes.map((almacen) => almacen.ciudad)
+    const listaCiudades = almacenes
+      .filter((a) => a.uidCoordinadora === currentUser.uid)
+      .map((almacen) => almacen?.ciudad)
     // Eliminamos duplicados utilizando Set y luego lo convertimos a un array nuevamente
     setCiudades([...new Set(listaCiudades)])
     // Al inicio, mostramos todos los almacenes sin filtrar (ordenados por activo y luego inactivo)
@@ -52,7 +54,7 @@ export default function MaestroAlmacenes() {
         .filter(
           (almacen) =>
             almacen.nombre.toUpperCase().includes(valorBusqueda) &&
-            (!buscarCiudad || almacen.ciudad === buscarCiudad) &&
+            (!buscarCiudad || almacen?.ciudad === buscarCiudad) &&
             almacen.uidCoordinadora === currentUser.uid
         )
         // Ordenar primero Activos y luego Inactivos
@@ -71,7 +73,7 @@ export default function MaestroAlmacenes() {
         .filter(
           (almacen) =>
             almacen.nombre.toUpperCase().includes(buscarNombre) &&
-            (!buscarCiudad || almacen.ciudad === buscarCiudad) &&
+            (!buscarCiudad || almacen?.ciudad === buscarCiudad) &&
             almacen.uidCoordinadora === currentUser.uid
         )
         // Ordenar primero Activos y luego Inactivos
@@ -172,7 +174,7 @@ export default function MaestroAlmacenes() {
                         }`}
                       ></i>
                     </th>
-                    <td className='align-middle'>{almacen.ciudad}</td>
+                    <td className='align-middle'>{almacen?.ciudad}</td>
                     <td className='align-middle'>{almacen.nombre}</td>
                     <td className='align-middle'>{almacen.direccion}</td>
                     <td
