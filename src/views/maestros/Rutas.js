@@ -108,12 +108,18 @@ function MaestroRutas() {
         return updatedValues
       }
 
-      if (
-        almacenIndex === 1 &&
-        prevValues[`${fecha}_almacen2`] === selectedValue
-      ) {
+      // Si se elimina un almacen, se eliminan los almacenes siguientes
+      if (almacenIndex === 1) {
         const updatedValues = { ...prevValues }
         delete updatedValues[`${fecha}_almacen2`]
+        delete updatedValues[`${fecha}_almacen3`]
+        return {
+          ...updatedValues,
+          [key]: selectedValue,
+        }
+      } else if (almacenIndex === 2) {
+        const updatedValues = { ...prevValues }
+        delete updatedValues[`${fecha}_almacen3`]
         return {
           ...updatedValues,
           [key]: selectedValue,
@@ -146,7 +152,6 @@ function MaestroRutas() {
   }
 
   const handleSubmit = async (e) => {
-    console.log('Formulario enviado')
     e.preventDefault()
 
     if (!formularioValido) {
@@ -281,6 +286,38 @@ function MaestroRutas() {
       })
       .finally(resetForm)
   }
+
+  useEffect(() => {
+    // Cada cambio en rutasExistentes dispara la validación de almacenes y establece el estado de los valores seleccionados
+    const validarAlmacenes = () => {
+      const almacenesValidos = {}
+      const selectedValues = {}
+
+      // recorrer las rutas existentes y establecer los almacenes válidos
+      for (const [fechaStr, ruta] of Object.entries(rutasExistentes)) {
+        if (!ruta.almacenes) continue
+
+        const almacenes = Object.keys(ruta.almacenes)
+
+        for (const [index, almacen] of almacenes.entries()) {
+          const key = `${fechaStr}_almacen${index + 1}`
+          const almacenValido = almacenesActivos.some(
+            (a) => a.nombre === almacen
+          )
+
+          almacenesValidos[key] = almacenValido
+          selectedValues[key] = almacen
+        }
+      }
+
+      setAlmacenesValidos(almacenesValidos)
+      setSelectedValues(selectedValues)
+    }
+
+    validarAlmacenes()
+
+    // eslint-disable-next-line
+  }, [rutasExistentes])
 
   const renderFechaSelectors = () => {
     const fechaSelectors = []
