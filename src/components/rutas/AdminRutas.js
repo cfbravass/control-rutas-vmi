@@ -35,7 +35,7 @@ function AdminRutas() {
 
   useEffect(() => {
     const filtrarRutas = async () => {
-      await filtrarRutasPorFecha(fechaSeleccionada)
+      await filtrarRutasPorFecha(fechaSeleccionada, null, null, currentUser.uid)
     }
 
     filtrarRutas()

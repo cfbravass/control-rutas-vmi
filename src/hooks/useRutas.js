@@ -183,7 +183,8 @@ export default function useRutas(uidUsuario = '') {
   const filtrarRutasPorFecha = async (
     fechaInicio,
     fechaFin = null,
-    uidUsuario = null
+    uidUsuario = null,
+    uidCoordinadora = null
   ) => {
     if (!fechaInicio) return
 
@@ -214,6 +215,8 @@ export default function useRutas(uidUsuario = '') {
       )
 
       if (uidUsuario) q = query(q, where('uidUsuario', '==', uidUsuario))
+      if (uidCoordinadora)
+        q = query(q, where('uidCoordinadora', '==', uidCoordinadora))
 
       const unsubscribe = onSnapshot(
         q,
