@@ -82,6 +82,16 @@ export default function ModalMapa({ idModal, visita, ruta }) {
               <ContenedorMapa almacen={almacen} visita={visita} />
             )}
 
+            {/* DIV temporal para la facil asignacion de correctas ubicaciones de almacen */}
+            <div style='display: flex; justify-content: space-between; align-items: center; width: 100%; text-align: left;'>
+              <span style='margin: 0; padding: 0;'>
+                LAT: {visita?.ubicacionIngreso?.latitude}
+              </span>
+              <span style='float: right; top: 0; margin: 0; padding: 0;'>
+                LNG: {visita?.ubicacionIngreso?.longitude}
+              </span>
+            </div>
+
             {almacen.nota && (
               <div className='m-0 p-0'>
                 <b>NOTAS DEL ALMACÉN</b>
