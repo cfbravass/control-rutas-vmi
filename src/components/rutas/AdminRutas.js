@@ -103,7 +103,7 @@ function AdminRutas() {
                             data-bs-target={`#modalMapa-${ruta.id}-${visita.idAlmacen}`}
                           >
                             <div className='row m-0 p-0 d-flex justify-content-center'>
-                              <span className='col-8'>{almacen}</span>
+                              <span className='col-6'>{almacen}</span>
                               <span className='col-2 text-center p-0 pe-1'>
                                 {visita.horaIngreso
                                   ?.toDate()
@@ -119,6 +119,30 @@ function AdminRutas() {
                                     hour: '2-digit',
                                     minute: '2-digit',
                                   }) || '--:--'}
+                              </span>
+                              <span className='col-2 text-center p-0 ps-1 border rounded bg-dark text-light'>
+                                {visita.horaIngreso && visita.horaSalida ? (
+                                  <>
+                                    {Math.floor(
+                                      (visita.horaSalida.toDate() -
+                                        visita.horaIngreso.toDate()) /
+                                        36e5
+                                    )
+                                      .toString()
+                                      .padStart(2, '0')}
+                                    :
+                                    {Math.floor(
+                                      ((visita.horaSalida.toDate() -
+                                        visita.horaIngreso.toDate()) %
+                                        36e5) /
+                                        6e4
+                                    )
+                                      .toString()
+                                      .padStart(2, '0')}
+                                  </>
+                                ) : (
+                                  '--:--'
+                                )}
                               </span>
                             </div>
 

@@ -18,12 +18,17 @@ const ContenedorMapa = ({ almacen, visita }) => {
         lat={almacen.ubicacion.latitude}
         lng={almacen.ubicacion.longitude}
         icon='almacen'
+        label={almacen.nombre}
       />
       {visita.ubicacionIngreso && (
         <MarcadorMapa
           lat={visita.ubicacionIngreso.latitude}
           lng={visita.ubicacionIngreso.longitude}
           icon='ingreso'
+          label={visita.horaIngreso?.toDate().toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
         />
       )}
       {visita.ubicacionSalida && (
@@ -31,6 +36,10 @@ const ContenedorMapa = ({ almacen, visita }) => {
           lat={visita.ubicacionSalida.latitude}
           lng={visita.ubicacionSalida.longitude}
           icon='salida'
+          label={visita.horaSalida?.toDate().toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
         />
       )}
     </MapContainer>

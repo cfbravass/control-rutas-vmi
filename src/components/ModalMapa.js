@@ -59,6 +59,31 @@ export default function ModalMapa({ idModal, visita, ruta }) {
                   minute: '2-digit',
                 }) || '--:--'}
               </li>
+              <li className='list-group-item w-50 p-0'>
+                Total:{' '}
+                {visita.horaIngreso && visita.horaSalida ? (
+                  <>
+                    {Math.floor(
+                      (visita.horaSalida.toDate() -
+                        visita.horaIngreso.toDate()) /
+                        36e5
+                    )
+                      .toString()
+                      .padStart(2, '0')}
+                    :
+                    {Math.floor(
+                      ((visita.horaSalida.toDate() -
+                        visita.horaIngreso.toDate()) %
+                        36e5) /
+                        6e4
+                    )
+                      .toString()
+                      .padStart(2, '0')}
+                  </>
+                ) : (
+                  '--:--'
+                )}
+              </li>
             </ul>
             {(visita.novedadIngreso || visita.novedadSalida) && (
               <ul className='list-group list-group-horizontal mb-1'>
