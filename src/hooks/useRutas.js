@@ -19,12 +19,14 @@ import {
 } from 'firebase/firestore'
 import { toast } from 'react-toastify'
 import { db } from '../firebaseApp'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function useRutas(uidUsuario = '') {
   const [rutas, setRutas] = useState([])
   const [rutasPorFecha, setRutasPorFecha] = useState([])
   const [cargando, setCargando] = useState(true)
   const unsubscribeRef = useRef(null)
+  const { isAuthenticated } = useAuth()
 
   // Función para obtener las rutas vigentes de un usuario y escuchar cambios en tiempo real
   const obtenerRutasVigentes = () => {
@@ -186,6 +188,7 @@ export default function useRutas(uidUsuario = '') {
     uidUsuario = null,
     uidCoordinadora = null
   ) => {
+    if (!isAuthenticated) return
     if (!fechaInicio) return
 
     setCargando(true)
