@@ -224,6 +224,9 @@ export default function useRutas(uidUsuario = '') {
       const unsubscribe = onSnapshot(
         q,
         (querySnapshot) => {
+          // Si se desautentica justo en medio del snapshot
+          if (!isAuthenticated) return
+
           const rutas = querySnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
@@ -232,16 +235,22 @@ export default function useRutas(uidUsuario = '') {
           setCargando(false)
         },
         (error) => {
-          toast.error(`Error al filtrar las rutas por fecha:\n${error.message}`)
-          console.error('Error al filtrar las rutas por fecha:', error)
+          if (isAuthenticated) {
+            toast.error(
+              `Error al filtrar las rutas por fecha:\n${error.message}`
+            )
+            console.error('Error al filtrar las rutas por fecha:', error)
+          }
           setCargando(false)
         }
       )
 
       unsubscribeRef.current = unsubscribe
     } catch (error) {
-      toast.error(`Error al filtrar las rutas por fecha:\n${error.message}`)
-      console.error('Error al filtrar las rutas por fecha:', error)
+      if (isAuthenticated) {
+        toast.error(`Error al filtrar las rutas por fecha:\n${error.message}`)
+        console.error('Error al filtrar las rutas por fecha:', error)
+      }
       setCargando(false)
     }
   }
