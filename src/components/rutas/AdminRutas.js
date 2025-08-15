@@ -145,7 +145,7 @@ function AdminRutas() {
                                       .padStart(2, '0')}
                                   </>
                                 ) : (
-                                  '--:--:--'
+                                  '--:--'
                                 )}
                               </span>
                             </div>
@@ -183,7 +183,7 @@ function AdminRutas() {
                           .padStart(2, '0')}
                       </>
                     ) : (
-                      '--:--'
+                      '--:--:--'
                     )}
                   </td>
                 </tr>
