@@ -181,6 +181,24 @@ export default function useRutas(uidUsuario = '') {
     }
   }
 
+  // Función para marcar inicio y fin del tiempo de almuerzo
+  const marcarAlmuerzo = async (ruta, tipo) => {
+    try {
+      if (['inicio', 'fin'].includes(tipo) === false) {
+        throw new Error(`Tipo de almuerzo no permitido: '${tipo}'`)
+      }
+
+      const hora = serverTimestamp()
+
+      await editarRuta(ruta.id, {
+        [`hora${tipo === 'inicio' ? 'Inicio' : 'Fin'}Almuerzo`]: hora,
+      })
+    } catch (error) {
+      toast.error(error.message)
+      console.error(error)
+    }
+  }
+
   // Función para filtrar las rutas por fecha y escuchar cambios en tiempo real
   const filtrarRutasPorFecha = async (
     fechaInicio,
@@ -271,6 +289,7 @@ export default function useRutas(uidUsuario = '') {
     crearRuta,
     eliminarRuta,
     marcarFichaje,
+    marcarAlmuerzo,
     filtrarRutasPorFecha,
   }
 }

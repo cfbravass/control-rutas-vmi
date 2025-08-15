@@ -19,6 +19,7 @@ function Rutas() {
     rutas,
     cargando: cargandoRutas,
     marcarFichaje,
+    marcarAlmuerzo,
   } = useRutas(currentUser.uid)
 
   const renderButton = (ruta, almacen, visita) => {
@@ -44,12 +45,16 @@ function Rutas() {
       )
     }
 
+    const enAlmuerzo =
+      ruta.horaInicioAlmuerzo && !ruta.horaFinAlmuerzo ? true : false
+
     if ([null, undefined, ''].includes(visita.horaIngreso)) {
       return (
         <button
           className='list-group-item list-group-item-action d-flex justify-content-between align-items-center fw-bold'
           onClick={() => marcarFichaje(ruta, almacen, 'ingreso')}
           key={`${ruta.id}-${almacen}`}
+          disabled={enAlmuerzo}
         >
           {almacen}
           <img
@@ -66,6 +71,7 @@ function Rutas() {
           className='list-group-item list-group-item-action d-flex justify-content-between align-items-center fw-bold'
           onClick={() => marcarFichaje(ruta, almacen, 'salida')}
           key={`${ruta.id}-${almacen}`}
+          disabled={enAlmuerzo}
         >
           {almacen}
           <img
@@ -126,7 +132,7 @@ function Rutas() {
                       key={ruta.id}
                     >
                       <div className='card border-dark mb-4'>
-                        <div className='card-header text-bg-primary text-center'>
+                        <div className='card-header text-bg-primary text-center border-0'>
                           <h5 className='m-0'>
                             <i className='far fa-calendar me-1 fs-3'></i>
                             <br />
@@ -141,16 +147,45 @@ function Rutas() {
                             })}
                           </h5>
                         </div>
-                        <div className='card-body d-none'>
-                          <h5 className='card-title'>Titulo</h5>
-                          <p className='card-text'>Descripción</p>
-                        </div>
+
+                        {!ruta.horaFinAlmuerzo ? (
+                          !ruta.horaInicioAlmuerzo ? (
+                            <div className='card-body text-center text-white bg-primary p-1'>
+                              <button
+                                className='fw-bold p-1 text-warning-emphasis bg-warning-subtle border border-warning rounded-3'
+                                onClick={() => marcarAlmuerzo(ruta, 'inicio')}
+                              >
+                                <i
+                                  className='fas fa-burger'
+                                  style={{ width: '32px', fontSize: '1.2rem' }}
+                                ></i>
+                                SALIR A ALMORZAR
+                              </button>
+                            </div>
+                          ) : (
+                            <div className='card-body text-center text-white bg-primary p-1'>
+                              <button
+                                className='fw-bold p-1 text-success-emphasis bg-primary-subtle border border-primary-subtle rounded-3'
+                                onClick={() => marcarAlmuerzo(ruta, 'fin')}
+                              >
+                                <i
+                                  className='fas fa-mug-hot'
+                                  style={{ width: '32px', fontSize: '1.2rem' }}
+                                ></i>
+                                REGRESAR DE ALMUERZO
+                              </button>
+                            </div>
+                          )
+                        ) : null}
 
                         <div className='list-group list-group-flush'>
-                          {Object.entries(ruta.almacenes).map(
-                            ([almacen, visita]) =>
+                          {Object.entries(ruta.almacenes)
+                            .sort(([almacenA], [almacenB]) =>
+                              almacenA.localeCompare(almacenB)
+                            )
+                            .map(([almacen, visita]) =>
                               renderButton(ruta, almacen, visita)
-                          )}
+                            )}
                         </div>
                       </div>
                     </div>

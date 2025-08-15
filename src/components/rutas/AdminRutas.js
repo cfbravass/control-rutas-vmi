@@ -69,6 +69,9 @@ function AdminRutas() {
               <th scope='col'>
                 <i className='fas fa-store'></i> ALMACENES
               </th>
+              <th scope='col' className='text-center'>
+                <i className='fas fa-burger'></i> ALMUERZO HH:MM:SS
+              </th>
             </tr>
           </thead>
           <tbody className='table-group-divider'>
@@ -121,6 +124,7 @@ function AdminRutas() {
                                   }) || '--:--'}
                               </span>
                               <span className='col-2 text-center p-0 ps-1 border rounded bg-dark text-light'>
+                                <i className='fas fa-clock'></i>{' '}
                                 {visita.horaIngreso && visita.horaSalida ? (
                                   <>
                                     {Math.floor(
@@ -141,7 +145,7 @@ function AdminRutas() {
                                       .padStart(2, '0')}
                                   </>
                                 ) : (
-                                  '--:--'
+                                  '--:--:--'
                                 )}
                               </span>
                             </div>
@@ -155,6 +159,32 @@ function AdminRutas() {
                         )
                       )}
                     </ul>
+                  </td>
+                  <td className='text-center'>
+                    <i className='fas fa-utensils'></i>{' '}
+                    {ruta.horaInicioAlmuerzo && ruta.horaFinAlmuerzo ? (
+                      <>
+                        00:
+                        {Math.floor(
+                          (ruta.horaFinAlmuerzo.toDate() -
+                            ruta.horaInicioAlmuerzo.toDate()) /
+                            6e4
+                        )
+                          .toString()
+                          .padStart(2, '0')}
+                        :
+                        {Math.floor(
+                          ((ruta.horaFinAlmuerzo.toDate() -
+                            ruta.horaInicioAlmuerzo.toDate()) %
+                            6e4) /
+                            1e3
+                        )
+                          .toString()
+                          .padStart(2, '0')}
+                      </>
+                    ) : (
+                      '--:--'
+                    )}
                   </td>
                 </tr>
               ))
