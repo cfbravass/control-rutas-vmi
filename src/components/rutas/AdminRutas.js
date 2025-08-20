@@ -163,27 +163,13 @@ function AdminRutas() {
                   <td className='text-center'>
                     <i className='fas fa-utensils'></i>{' '}
                     {ruta.horaInicioAlmuerzo && ruta.horaFinAlmuerzo ? (
-                      <>
-                        00:
-                        {Math.floor(
-                          (ruta.horaFinAlmuerzo.toDate() -
-                            ruta.horaInicioAlmuerzo.toDate()) /
-                            6e4
-                        )
-                          .toString()
-                          .padStart(2, '0')}
-                        :
-                        {Math.floor(
-                          ((ruta.horaFinAlmuerzo.toDate() -
-                            ruta.horaInicioAlmuerzo.toDate()) %
-                            6e4) /
-                            1e3
-                        )
-                          .toString()
-                          .padStart(2, '0')}
-                      </>
+                      `${Math.floor(
+                        (ruta.horaFinAlmuerzo.toDate() -
+                          ruta.horaInicioAlmuerzo.toDate()) /
+                          6e4
+                      )} Minutos`
                     ) : (
-                      '--:--:--'
+                      <span className='text-danger'>No almorzó</span>
                     )}
                   </td>
                 </tr>

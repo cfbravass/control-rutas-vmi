@@ -13,6 +13,8 @@ import logoIngresar from '../static/assets/img/logo-entrar.png'
 import logoSalir from '../static/assets/img/logo-salir.png'
 import xCalendario from '../static/assets/img/xcalendario.png'
 
+import { useState } from 'react'
+
 function Rutas() {
   const { currentUser, userData } = useAuth()
   const {
@@ -21,6 +23,9 @@ function Rutas() {
     marcarFichaje,
     marcarAlmuerzo,
   } = useRutas(currentUser.uid)
+
+  // Estado para desactivar botones de almuerzo
+  const [almuerzoLoading, setAlmuerzoLoading] = useState(false)
 
   const renderButton = (ruta, almacen, visita) => {
     /* Validar si la ruta corresponde a la fecha actual y renderizar botones */
@@ -153,12 +158,33 @@ function Rutas() {
                             <div className='card-body text-center text-white bg-primary p-1'>
                               <button
                                 className='fw-bold p-1 text-warning-emphasis bg-warning-subtle border border-warning rounded-3'
-                                onClick={() => marcarAlmuerzo(ruta, 'inicio')}
+                                onClick={async () => {
+                                  setAlmuerzoLoading(true)
+                                  try {
+                                    await marcarAlmuerzo(ruta, 'inicio')
+                                  } finally {
+                                    setAlmuerzoLoading(false)
+                                  }
+                                }}
+                                disabled={almuerzoLoading}
                               >
-                                <i
-                                  className='fas fa-burger'
-                                  style={{ width: '32px', fontSize: '1.2rem' }}
-                                ></i>
+                                {almuerzoLoading ? (
+                                  <i
+                                    className='fas fa-spinner fa-spin'
+                                    style={{
+                                      width: '32px',
+                                      fontSize: '1.2rem',
+                                    }}
+                                  ></i>
+                                ) : (
+                                  <i
+                                    className='fas fa-burger'
+                                    style={{
+                                      width: '32px',
+                                      fontSize: '1.2rem',
+                                    }}
+                                  ></i>
+                                )}
                                 SALIR A ALMORZAR
                               </button>
                             </div>
@@ -166,12 +192,33 @@ function Rutas() {
                             <div className='card-body text-center text-white bg-primary p-1'>
                               <button
                                 className='fw-bold p-1 text-success-emphasis bg-primary-subtle border border-primary-subtle rounded-3'
-                                onClick={() => marcarAlmuerzo(ruta, 'fin')}
+                                onClick={async () => {
+                                  setAlmuerzoLoading(true)
+                                  try {
+                                    await marcarAlmuerzo(ruta, 'fin')
+                                  } finally {
+                                    setAlmuerzoLoading(false)
+                                  }
+                                }}
+                                disabled={almuerzoLoading}
                               >
-                                <i
-                                  className='fas fa-mug-hot'
-                                  style={{ width: '32px', fontSize: '1.2rem' }}
-                                ></i>
+                                {almuerzoLoading ? (
+                                  <i
+                                    className='fas fa-spinner fa-spin'
+                                    style={{
+                                      width: '32px',
+                                      fontSize: '1.2rem',
+                                    }}
+                                  ></i>
+                                ) : (
+                                  <i
+                                    className='fas fa-mug-hot'
+                                    style={{
+                                      width: '32px',
+                                      fontSize: '1.2rem',
+                                    }}
+                                  ></i>
+                                )}
                                 REGRESAR DE ALMUERZO
                               </button>
                             </div>
